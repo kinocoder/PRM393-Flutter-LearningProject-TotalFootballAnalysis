@@ -1,17 +1,43 @@
-# united2
+## ⚠️ Disclaimer
 
-A new Flutter project.
+This project is an **unofficial personal learning project**.
 
-## Getting Started
+It is not affiliated with, endorsed by, or officially connected to **Total Football VNG** or its developers/publishers.
 
-This project is a starting point for a Flutter application.
+All game-related names, player information, images, trademarks, logos, and other intellectual property belong to their respective owners.
 
-A few resources to get you started if this is your first Flutter project:
+The project is intended for **educational and personal use**.
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 📄 License
+
+This project is licensed under the **MIT License**.
+
+The MIT License applies to the original source code of this repository.
+
+It does **not** grant permission to use third-party assets, trademarks, logos, images, game content, or other intellectual property belonging to Total Football VNG or other respective owners.
+
+See the [`LICENSE`](LICENSE) file for the full license text.
+
+---
+
+## 🚧 Project Status
+
+> **Early Development — Week 1**
+
+The application is currently in the initial development stage.
+
+Features, architecture, data sources and analysis methods may change as the developer progresses through the Flutter learning roadmap.
+
+---
+
+## 👨‍💻 Purpose
+
+This repository serves as both:
+
+* 📚 A **Flutter learning journal**
+* 🛠️ A **personal software project**
+* ⚽ A **Total Football player analysis tool**
+
+The final goal is not simply to have a working app, but to understand **how and why each part of the application works**.
