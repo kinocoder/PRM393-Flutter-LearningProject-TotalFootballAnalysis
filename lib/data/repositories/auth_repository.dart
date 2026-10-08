@@ -22,4 +22,14 @@ class AuthRepository {
   }) {
     return _authService.register(email: email.trim(), password: password);
   }
+
+  Future<void> sendEmailVerification() {
+    return _authService.sendEmailVerification();
+  }
+
+  String? get currentUserEmail => _authService.currentUserEmail;
+
+  Future<bool> reloadAndCheckEmailVerified() {
+    return _authService.reloadAndCheckEmailVerified();
+  }
 }

@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../view_models/register_view_model.dart';
 
+import 'package:united2/routing/app_routes.dart';
+
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
 
@@ -32,8 +34,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Đăng ký tài khoản')),
       body: SafeArea(
-        child: Align(
-          alignment: const Alignment(0, -1 / 3),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
           child: Card(
             child: Padding(
               padding: const EdgeInsets.all(24),
@@ -135,17 +137,20 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               );
 
                               //Nhận thông báo từ Firebase
-                              final message = result.hasError
-                                  ? ref
-                                        .read(
-                                          registerViewModelProvider.notifier,
-                                        )
-                                        .getRegisterErrorMessage(result.error!)
-                                  : 'Đăng ký thành công!';
+                              if (result.hasError) {
+                                final message = ref
+                                    .read(registerViewModelProvider.notifier)
+                                    .getRegisterErrorMessage(result.error!);
 
-                              ScaffoldMessenger.of(
-                                context,
-                              ).showSnackBar(SnackBar(content: Text(message)));
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(message)),
+                                );
+
+                                return;
+                              }
+
+                              Navigator.of(context)
+                                  .pushReplacementNamed(AppRoutes.verifyEmail);
                             },
                       child: registerState.isLoading
                           ? const SizedBox(
