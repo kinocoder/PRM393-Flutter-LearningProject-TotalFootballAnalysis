@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "308278570937",
+    "project_id": "totalfootballvng-2bda1",
+    "storage_bucket": "totalfootballvng-2bda1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:308278570937:android:acf321f6e52ee0ebca9068",
+        "android_client_info": {
+          "package_name": "com.example.united2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyArsNEqNWi7iMuiRgdFpnJpZ_EDWqPUErM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
