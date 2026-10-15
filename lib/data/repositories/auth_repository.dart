@@ -41,6 +41,4 @@ class AuthRepository {
   Future<bool> reloadAndCheckEmailVerified() {
     return _authService.reloadAndCheckEmailVerified();
   }
-
-
 }
