@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../view_models/register_view_model.dart';
-import 'package:united2/utils/validators/email_validator.dart';
 
 import 'package:united2/routing/app_routes.dart';
 
@@ -57,7 +56,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     const SizedBox(height: 24),
 
                     TextFormField(
-                      validator: validateEmail,
+                      validator: (value) {
+                        return ref
+                            .read(registerViewModelProvider.notifier)
+                            .validateEmail(value);
+                      },
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
                       autocorrect: false,

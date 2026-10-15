@@ -13,6 +13,19 @@ class RegisterViewModel extends _$RegisterViewModel {
     // Chưa cần tải dữ liệu ban đầu.
   }
 
+  String? validateEmail(String? value) {
+    final email = value?.trim() ?? '';
+
+    if (email.isEmpty) {
+      return 'Vui lòng nhập email';
+    }
+
+    if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email)) {
+      return 'Email không đúng định dạng';
+    }
+
+    return null;
+  }
 
   String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {
@@ -58,7 +71,7 @@ class RegisterViewModel extends _$RegisterViewModel {
     return null;
   }
 
-  //Lỗi đăng ký
+  //Lỗi
   String getRegisterErrorMessage(Object error) {
     if (error is FirebaseAuthException) {
       switch (error.code) {

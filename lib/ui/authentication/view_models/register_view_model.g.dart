@@ -33,7 +33,7 @@ final class RegisterViewModelProvider
   RegisterViewModel create() => RegisterViewModel();
 }
 
-String _$registerViewModelHash() => r'5975865a5ab92398aaa2a892eaa767dd5ff0a361';
+String _$registerViewModelHash() => r'5f88163e00f4add45bfd0951a11e1bd56f257fe4';
 
 abstract class _$RegisterViewModel extends $AsyncNotifier<void> {
   FutureOr<void> build();

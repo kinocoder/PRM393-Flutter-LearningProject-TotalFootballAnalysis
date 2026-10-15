@@ -1,0 +1,6 @@
+# Cấu hình Firebase
+/android/app/google-services.json @kinocoder
+/lib/firebase_options.dart @kinocoder
+
+# Quy định người duyệt
+/.github/CODEOWNERS @kinocoder
