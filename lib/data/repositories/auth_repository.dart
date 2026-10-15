@@ -16,11 +16,20 @@ class AuthRepository {
   AuthRepository({required AuthService authService})
     : _authService = authService;
 
+  //Đăng ký
   Future<UserCredential> register({
     required String email,
     required String password,
   }) {
     return _authService.register(email: email.trim(), password: password);
+  }
+
+  //Đăng nhập
+  Future<UserCredential>login({
+    required String email,
+    required String password
+  }){
+    return _authService.login(email: email.trim(), password: password);
   }
 
   Future<void> sendEmailVerification() {

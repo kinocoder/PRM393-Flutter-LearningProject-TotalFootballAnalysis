@@ -5,6 +5,7 @@ class AuthService {
 
   AuthService({required FirebaseAuth auth}) : _auth = auth;
 
+  //đăng ký
   Future<UserCredential> register({
     required String email,
     required String password,
@@ -12,6 +13,17 @@ class AuthService {
     return _auth.createUserWithEmailAndPassword(
       email: email,
       password: password,
+    );
+  }
+
+  //Đăng nhập
+  Future<UserCredential> login({
+    required String email,
+    required String password,
+  }) {
+    return _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password
     );
   }
 
