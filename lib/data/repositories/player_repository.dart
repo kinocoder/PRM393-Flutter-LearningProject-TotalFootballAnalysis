@@ -1,4 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../../utils/text_normalize.dart';
 import '../model/player.dart';
 import '../model/skill.dart';
 part 'player_repository.g.dart';
@@ -236,11 +237,14 @@ class PlayerRepository {
     return null;
   }
 
-  Future<List<Player>> getPlayerByName(String name) async {
-    final keyword = name.trim().toLowerCase();
-    final results = players.where((player) {
-      return player.name.toLowerCase().contains(keyword);
+  Future<List<Player>> searchPlayers(String query) async {
+    final keyword = normalizeForSearch(query);
+    if (keyword.isEmpty) return [];
+
+    return players.where((player) {
+      final name = normalizeForSearch(player.name);
+      final fullName = normalizeForSearch(player.fullName);
+      return name.contains(keyword) || fullName.contains(keyword);
     }).toList();
-    return results;
   }
 }
