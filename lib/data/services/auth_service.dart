@@ -5,6 +5,12 @@ class AuthService {
 
   AuthService({required FirebaseAuth auth}) : _auth = auth;
 
+  //Quên mật khẩu
+  Future<void> sendPasswordResetEmail({required String email}) {
+    return _auth.sendPasswordResetEmail(email: email);
+  }
+
+  //đăng ký
   Future<UserCredential> register({
     required String email,
     required String password,
@@ -13,6 +19,14 @@ class AuthService {
       email: email,
       password: password,
     );
+  }
+
+  //Đăng nhập
+  Future<UserCredential> login({
+    required String email,
+    required String password,
+  }) {
+    return _auth.signInWithEmailAndPassword(email: email, password: password);
   }
 
   //Gửi mail
