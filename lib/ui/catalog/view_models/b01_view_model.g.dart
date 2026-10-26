@@ -33,7 +33,7 @@ final class B01ViewModelProvider
   B01ViewModel create() => B01ViewModel();
 }
 
-String _$b01ViewModelHash() => r'f53ff8b2c0b555fba2ec033de84936e58501c9b1';
+String _$b01ViewModelHash() => r'02fbc75f5a31d1b3023f8d4f8352344573eca6e6';
 
 abstract class _$B01ViewModel extends $AsyncNotifier<List<Player>> {
   FutureOr<List<Player>> build();
