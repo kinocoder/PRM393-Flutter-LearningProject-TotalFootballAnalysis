@@ -171,4 +171,4 @@ final class A01CandidatePlayersProvider
 }
 
 String _$a01CandidatePlayersHash() =>
-    r'33aad298ff2e260ec9af3fd6dd8ddab7dae9d72e';
+    r'bfd11662e3d701ae9c47a98179a1bd9be1f27d5d';

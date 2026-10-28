@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/model/player.dart';
 import '../../../data/model/stat_row.dart';
 import '../../../routing/app_routes.dart';
-import '../view_models/a01_view_model.dart';
 import '../view_models/a02_view_model.dart';
 import 'comparison_navigation_bar.dart';
 
@@ -14,21 +13,11 @@ class A02Screen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final comparisonAsync = ref.watch(a02ViewModelProvider);
-    final selectedIds = ref.watch(compareSelectionProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('So sánh chỉ số (A02)'),
+        title: const Text('So sánh chỉ số'),
         elevation: 1,
-        actions: [
-          IconButton(
-            tooltip: 'Đổi danh sách lựa chọn',
-            icon: const Icon(Icons.edit),
-            onPressed: () {
-              Navigator.of(context).pushReplacementNamed(AppRoutes.a01);
-            },
-          ),
-        ],
       ),
       body: Column(
         children: [
@@ -54,10 +43,6 @@ class A02Screen extends ConsumerWidget {
                 ),
               ),
               data: (data) {
-                if (data.players.isEmpty) {
-                  return _buildEmptyState(context);
-                }
-
                 return SingleChildScrollView(
                   padding: const EdgeInsets.all(12),
                   child: Column(
@@ -98,21 +83,19 @@ class A02Screen extends ConsumerWidget {
                     Navigator.of(context).pushReplacementNamed(AppRoutes.a01);
                   },
                   icon: const Icon(Icons.arrow_back),
-                  label: const Text('Thêm/Bỏ thẻ (A01)'),
+                  label: const Text('Thêm/Bỏ thẻ'),
                 ),
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor,
+                    backgroundColor: const Color(0xFF176B46),
                     foregroundColor: Colors.white,
                   ),
-                  onPressed: selectedIds.length >= 2
-                      ? () {
-                          Navigator.of(context)
-                              .pushReplacementNamed(AppRoutes.a03);
-                        }
-                      : null,
+                  onPressed: () {
+                    Navigator.of(context)
+                        .pushReplacementNamed(AppRoutes.a03);
+                  },
                   icon: const Icon(Icons.arrow_forward),
-                  label: const Text('Xem kỹ thuật (A03)'),
+                  label: const Text('Xem kỹ thuật'),
                 ),
               ],
             ),
@@ -122,38 +105,6 @@ class A02Screen extends ConsumerWidget {
     );
   }
 
-  /// Giao diện khi chưa chọn đủ cầu thủ để so sánh
-  Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.compare_arrows, size: 64, color: Colors.grey),
-            const SizedBox(height: 16),
-            const Text(
-              'Chưa có đủ cầu thủ để so sánh',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Vui lòng chọn từ 2 đến 3 cầu thủ tại màn hình A01.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pushReplacementNamed(AppRoutes.a01);
-              },
-              child: const Text('Quay lại chọn cầu thủ (A01)'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   /// Dựng danh sách các thẻ cầu thủ tóm tắt ở đầu màn hình
   Widget _buildHeaderPlayerCards(BuildContext context, List<Player> players) {
@@ -251,11 +202,6 @@ class A02Screen extends ConsumerWidget {
             const Text(
               'Bảng so sánh chỉ số tổng quát',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              'Chênh lệch Δ = Giá trị thẻ − Giá trị cao nhất của các thẻ còn lại. Dữ liệu thiếu hiện N/A, delta hiện — (BR-02).',
-              style: TextStyle(fontSize: 11, color: Colors.grey),
             ),
             const SizedBox(height: 12),
             SingleChildScrollView(

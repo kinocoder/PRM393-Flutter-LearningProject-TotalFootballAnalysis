@@ -85,9 +85,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       onPressed: loginState.isLoading
                           ? null
                           : () {
-                              Navigator.of(context)
-                                  .pushNamed(AppRoutes.forgotPassword);
-                            },
+                        Navigator.of(context)
+                            .pushNamed(AppRoutes.forgotPassword);
+                      },
                       child: const Text('Quên mật khẩu?'),
                     ),
                   ),
@@ -99,51 +99,41 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           onPressed: loginState.isLoading
                               ? null
                               : () async {
-                                  final isValid =
-                                      _formKey.currentState?.validate() ??
-                                      false;
-                                  if (!isValid) return;
+                            final isValid =
+                                _formKey.currentState?.validate() ??
+                                    false;
+                            if (!isValid) return;
 
-                                  final result = await ref
-                                      .read(loginViewModelProvider.notifier)
-                                      .login(
-                                        email: _userName.text.trim(),
-                                        password: _password.text,
-                                      );
+                            await ref
+                                .read(loginViewModelProvider.notifier)
+                                .login(
+                              email: _userName.text.trim(),
+                              password: _password.text,
+                            );
 
-                                  if (!context.mounted) return;
+                            if (!context.mounted) return;
 
-                                  if (result == null) {
-                                    final state = ref.read(
-                                      loginViewModelProvider,
-                                    );
-                                    if (state.hasError) {
-                                      final message = ref
-                                          .read(loginViewModelProvider.notifier)
-                                          .getLoginErrorMessage(state.error!);
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                            SnackBar(content: Text(message)),
-                                          );
-                                    }
-                                    return;
-                                  }
-
-                                  final route =
-                                      result == LoginResult.authenticated
-                                      ? AppRoutes.home
-                                      : AppRoutes.verifyEmail;
-                                  Navigator.of(context)
-                                      .pushReplacementNamed(route);
-                                },
+                            final state = ref.read(
+                              loginViewModelProvider,
+                            );
+                            if (state.hasError) {
+                              final message = ref
+                                  .read(loginViewModelProvider.notifier)
+                                  .getLoginErrorMessage(state.error!);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(message)),
+                              );
+                            }
+                            // Session routing reacts to the repository stream.
+                          },
                           child: loginState.isLoading
                               ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                            ),
+                          )
                               : const Text('Đăng nhập'),
                         ),
                       ),

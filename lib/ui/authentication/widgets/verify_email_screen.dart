@@ -1,105 +1,68 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:united2/data/repositories/auth_repository.dart';
-import 'package:united2/routing/app_routes.dart';
+
+import '../view_models/auth_session_view_model.dart';
+import '../view_models/logout_view_model.dart';
+import '../view_models/verify_email_view_model.dart';
 
 class VerifyEmailScreen extends ConsumerStatefulWidget {
   const VerifyEmailScreen({super.key});
-
   @override
-  ConsumerState<VerifyEmailScreen> createState() =>
-      _VerifyEmailScreenState();
+  ConsumerState<VerifyEmailScreen> createState() => _VerifyEmailScreenState();
 }
 
 class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
-  bool _isSending = false;
-  bool _isChecking = false;
-
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _sendVerificationEmail();
+      if (mounted) _sendVerificationEmail();
     });
   }
 
-  String _errorMessage(Object error) {
-    if (error is FirebaseAuthException) {
-      switch (error.code) {
-        case 'network-request-failed':
-          return 'Không có kết nối mạng';
-        case 'too-many-requests':
-          return 'Bạn đã gửi quá nhiều lần. Vui lòng thử lại sau';
-      }
-    }
-
-    return 'Đã xảy ra lỗi. Vui lòng thử lại';
-  }
-
   void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   Future<void> _sendVerificationEmail() async {
-    if (_isSending) return;
-
-    setState(() => _isSending = true);
-
-    try {
-      await ref.read(authRepositoryProvider).sendEmailVerification();
-
-      if (!mounted) return;
-      _showMessage('Email xác minh đã được gửi');
-    } catch (error) {
-      if (!mounted) return;
-      _showMessage(_errorMessage(error));
-    } finally {
-      if (mounted) {
-        setState(() => _isSending = false);
-      }
-    }
+    final message = await ref
+        .read(verifyEmailViewModelProvider.notifier)
+        .sendEmail();
+    if (mounted && message != null) _showMessage(message);
   }
 
   Future<void> _checkEmailVerified() async {
-    if (_isChecking) return;
-
-    setState(() => _isChecking = true);
-
-    try {
-      final isVerified = await ref
-          .read(authRepositoryProvider)
-          .reloadAndCheckEmailVerified();
-
-      if (!mounted) return;
-
-      if (isVerified) {
-        Navigator.of(context).pushReplacementNamed(AppRoutes.home);
-        return;
-      }
-
-      _showMessage('Email chưa được xác minh');
-    } catch (error) {
-      if (!mounted) return;
-      _showMessage(_errorMessage(error));
-    } finally {
-      if (mounted) {
-        setState(() => _isChecking = false);
-      }
-    }
+    final message = await ref
+        .read(verifyEmailViewModelProvider.notifier)
+        .checkEmail();
+    if (mounted && message != null) _showMessage(message);
   }
 
   @override
   Widget build(BuildContext context) {
-    final email = ref.read(authRepositoryProvider).currentUserEmail;
-    final isLoading = _isSending || _isChecking;
-
+    final email = ref.watch(authSessionProvider).asData?.value?.email;
+    final action = ref.watch(verifyEmailViewModelProvider);
+    final logout = ref.watch(logoutViewModelProvider);
+    final isLoading = action != VerificationAction.idle || logout.isLoading;
+    ref.listen(logoutViewModelProvider, (previous, next) {
+      if (next.hasError) {
+        _showMessage(ref.read(logoutViewModelProvider.notifier).errorMessage);
+      }
+    });
     return Scaffold(
       appBar: AppBar(
         title: const Text('Xác minh email'),
         automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            tooltip: 'Đăng xuất',
+            icon: const Icon(Icons.logout),
+            onPressed: isLoading
+                ? null
+                : () => ref.read(logoutViewModelProvider.notifier).signOut(),
+          ),
+        ],
       ),
       body: SafeArea(
         child: Center(
@@ -108,18 +71,12 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
-                  Icons.mark_email_unread_outlined,
-                  size: 80,
-                ),
+                const Icon(Icons.mark_email_unread_outlined, size: 80),
                 const SizedBox(height: 24),
                 const Text(
                   'Kiểm tra hộp thư của bạn',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
                 Text(
@@ -133,19 +90,19 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: isLoading ? null : _checkEmailVerified,
-                    child: _isChecking
+                    child: action == VerificationAction.checking
                         ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
                         : const Text('Tôi đã xác minh'),
                   ),
                 ),
                 const SizedBox(height: 12),
                 TextButton(
                   onPressed: isLoading ? null : _sendVerificationEmail,
-                  child: _isSending
+                  child: action == VerificationAction.sending
                       ? const Text('Đang gửi...')
                       : const Text('Gửi lại email xác minh'),
                 ),

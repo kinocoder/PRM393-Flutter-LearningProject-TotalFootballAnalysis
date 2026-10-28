@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/model/player.dart';
 import '../../../data/model/skill_comparison.dart';
 import '../../../routing/app_routes.dart';
-import '../view_models/a01_view_model.dart';
 import '../view_models/a03_view_model.dart';
 import 'comparison_navigation_bar.dart';
 
@@ -14,11 +13,10 @@ class A03Screen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final stateAsync = ref.watch(a03ViewModelProvider);
-    final selectedIds = ref.watch(compareSelectionProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('So sánh kỹ thuật (A03)'),
+        title: const Text('So sánh kỹ thuật'),
         elevation: 1,
       ),
       body: Column(
@@ -43,10 +41,6 @@ class A03Screen extends ConsumerWidget {
                 ),
               ),
               data: (data) {
-                if (data.players.isEmpty) {
-                  return _buildEmptyState(context);
-                }
-
                 final comp = data.skillComparison;
 
                 return SingleChildScrollView(
@@ -123,21 +117,19 @@ class A03Screen extends ConsumerWidget {
                     Navigator.of(context).pushReplacementNamed(AppRoutes.a02);
                   },
                   icon: const Icon(Icons.arrow_back),
-                  label: const Text('Xem chỉ số (A02)'),
+                  label: const Text('Xem chỉ số'),
                 ),
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor,
+                    backgroundColor: const Color(0xFF176B46),
                     foregroundColor: Colors.white,
                   ),
-                  onPressed: selectedIds.length >= 2
-                      ? () {
-                          Navigator.of(context)
-                              .pushReplacementNamed(AppRoutes.a04);
-                        }
-                      : null,
+                  onPressed: () {
+                    Navigator.of(context)
+                        .pushReplacementNamed(AppRoutes.a04);
+                  },
                   icon: const Icon(Icons.arrow_forward),
-                  label: const Text('Đánh giá (A04)'),
+                  label: const Text('Đánh giá'),
                 ),
               ],
             ),
@@ -147,29 +139,6 @@ class A03Screen extends ConsumerWidget {
     );
   }
 
-  /// Giao diện hiển thị khi chưa chọn cầu thủ
-  Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.auto_awesome_outlined, size: 64, color: Colors.grey),
-          const SizedBox(height: 16),
-          const Text(
-            'Chưa chọn cầu thủ để so sánh kỹ thuật',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pushReplacementNamed(AppRoutes.a01);
-            },
-            child: const Text('Chuyển đến chọn cầu thủ (A01)'),
-          ),
-        ],
-      ),
-    );
-  }
 
   /// Chú thích các trạng thái dữ liệu kỹ thuật
   Widget _buildLegendCard(BuildContext context) {

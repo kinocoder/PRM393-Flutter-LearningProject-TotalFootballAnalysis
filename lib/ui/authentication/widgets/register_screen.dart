@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../view_models/register_view_model.dart';
-import 'package:united2/utils/validators/email_validator.dart';
 
-import 'package:united2/routing/app_routes.dart';
+import 'package:united2/utils/validators/email_validator.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -92,9 +91,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         return ref
                             .read(registerViewModelProvider.notifier)
                             .validateConfirmPassword(
-                              value,
-                              _passwordController.text,
-                            );
+                          value,
+                          _passwordController.text,
+                        );
                       },
                       controller: _confirmPasswordController,
                       obscureText: true,
@@ -112,49 +111,48 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       onPressed: registerState.isLoading
                           ? null
                           : () async {
-                              //Kiểm tra các ô nhập
-                              final isValid =
-                                  _formKey.currentState?.validate() ?? false;
+                        //Kiểm tra các ô nhập
+                        final isValid =
+                            _formKey.currentState?.validate() ?? false;
 
-                              if (!isValid) return;
+                        if (!isValid) return;
 
-                              await ref
-                                  .read(registerViewModelProvider.notifier)
-                                  .register(
-                                    email: _emailController.text.trim(),
-                                    password: _passwordController.text,
-                                  );
+                        await ref
+                            .read(registerViewModelProvider.notifier)
+                            .register(
+                          email: _emailController.text.trim(),
+                          password: _passwordController.text,
+                        );
 
-                              //kiểm tra màn hình còn tồn tại sau khi chờ ko
-                              if (!mounted) return;
+                        //kiểm tra màn hình còn tồn tại sau khi chờ ko
+                        if (!context.mounted) return;
 
-                              // Đọc trạng thái mới nhất sau đăng ký.
-                              final result = ref.read(
-                                registerViewModelProvider,
-                              );
+                        // Đọc trạng thái mới nhất sau đăng ký.
+                        final result = ref.read(
+                          registerViewModelProvider,
+                        );
 
-                              //Nhận thông báo từ Firebase
-                              if (result.hasError) {
-                                final message = ref
-                                    .read(registerViewModelProvider.notifier)
-                                    .getRegisterErrorMessage(result.error!);
+                        //Nhận thông báo từ Firebase
+                        if (result.hasError) {
+                          final message = ref
+                              .read(registerViewModelProvider.notifier)
+                              .getRegisterErrorMessage(result.error!);
 
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(message)),
-                                );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(message)),
+                          );
 
-                                return;
-                              }
+                          return;
+                        }
 
-                              Navigator.of(context)
-                                  .pushReplacementNamed(AppRoutes.verifyEmail);
-                            },
+                        // Session routing reacts to the repository stream.
+                      },
                       child: registerState.isLoading
                           ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
                           : const Text('Đăng ký'),
                     ),
                   ],

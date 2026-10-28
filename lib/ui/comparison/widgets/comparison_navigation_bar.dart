@@ -20,7 +20,7 @@ class ComparisonNavigationBar extends ConsumerWidget {
     final canNavigate = selectedIds.length >= 2;
 
     return Container(
-      color: Theme.of(context).primaryColor.withOpacity(0.05),
+      color: const Color(0xFF176B46).withOpacity(0.05),
       child: SafeArea(
         top: false,
         child: SingleChildScrollView(
@@ -32,7 +32,7 @@ class ComparisonNavigationBar extends ConsumerWidget {
               _buildTab(
                 context,
                 route: AppRoutes.a01,
-                label: 'A01 Chọn thẻ',
+                label: 'Chọn thẻ',
                 icon: Icons.person_add_outlined,
                 isActive: currentRoute == AppRoutes.a01,
                 badgeCount: selectedIds.length,
@@ -42,7 +42,7 @@ class ComparisonNavigationBar extends ConsumerWidget {
               _buildTab(
                 context,
                 route: AppRoutes.a02,
-                label: 'A02 Chỉ số',
+                label: 'So sánh chỉ số',
                 icon: Icons.bar_chart_outlined,
                 isActive: currentRoute == AppRoutes.a02,
                 enabled: canNavigate,
@@ -51,7 +51,7 @@ class ComparisonNavigationBar extends ConsumerWidget {
               _buildTab(
                 context,
                 route: AppRoutes.a03,
-                label: 'A03 Kỹ thuật',
+                label: 'So sánh kỹ thuật',
                 icon: Icons.auto_awesome_outlined,
                 isActive: currentRoute == AppRoutes.a03,
                 enabled: canNavigate,
@@ -60,7 +60,7 @@ class ComparisonNavigationBar extends ConsumerWidget {
               _buildTab(
                 context,
                 route: AppRoutes.a04,
-                label: 'A04 Đánh giá',
+                label: 'Đánh giá',
                 icon: Icons.star_outline,
                 isActive: currentRoute == AppRoutes.a04,
                 enabled: canNavigate,
@@ -83,7 +83,7 @@ class ComparisonNavigationBar extends ConsumerWidget {
     int? badgeCount,
   }) {
     final color = isActive
-        ? Theme.of(context).primaryColor
+        ? const Color(0xFF176B46)
         : enabled
             ? Colors.black87
             : Colors.grey;
@@ -99,11 +99,11 @@ class ComparisonNavigationBar extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: isActive
-              ? Theme.of(context).primaryColor.withOpacity(0.15)
+              ? const Color(0xFF176B46).withOpacity(0.15)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
           border: isActive
-              ? Border.all(color: Theme.of(context).primaryColor, width: 1.5)
+              ? Border.all(color: const Color(0xFF176B46), width: 1.5)
               : null,
         ),
         child: Row(
@@ -125,7 +125,7 @@ class ComparisonNavigationBar extends ConsumerWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: isActive ? Theme.of(context).primaryColor : Colors.grey[700],
+                  color: isActive ? const Color(0xFF176B46) : Colors.grey[700],
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(

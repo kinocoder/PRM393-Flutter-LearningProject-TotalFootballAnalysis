@@ -32,7 +32,7 @@ class _A01ScreenState extends ConsumerState<A01Screen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('So sánh cầu thủ (A01)'),
+        title: const Text('Chọn cầu thủ'),
         elevation: 1,
         actions: [
           if (selectedIds.isNotEmpty)
@@ -144,17 +144,17 @@ class _A01ScreenState extends ConsumerState<A01Screen> {
       return Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        color: Colors.amber.withOpacity(0.1),
+        color: Color(0xFF176B46),
         child: const Text(
-          'Vui lòng chọn từ 2 đến 3 cầu thủ để bắt đầu so sánh (MSG-06).',
-          style: TextStyle(fontSize: 13, color: Colors.amber),
+          'Vui lòng chọn từ 2 đến 3 cầu thủ để bắt đầu so sánh.',
+          style: TextStyle(fontSize: 13, color: Colors.white),
         ),
       );
     }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: Theme.of(context).primaryColor.withOpacity(0.05),
+      color: const Color(0xFF176B46).withOpacity(0.05),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -171,7 +171,7 @@ class _A01ScreenState extends ConsumerState<A01Screen> {
               if (selectedIds.length < 2)
                 Text(
                   'Chọn thêm ${2 - selectedIds.length} thẻ nữa',
-                  style: const TextStyle(fontSize: 12, color: Colors.orange),
+                  style: const TextStyle(fontSize: 12, color: Colors.red),
                 ),
             ],
           ),
@@ -193,7 +193,7 @@ class _A01ScreenState extends ConsumerState<A01Screen> {
                 children: players.map((player) {
                   return Chip(
                     avatar: CircleAvatar(
-                      backgroundColor: Theme.of(context).primaryColor,
+                      backgroundColor: const Color(0xFF176B46),
                       child: Text(
                         player.position,
                         style: const TextStyle(
@@ -231,7 +231,7 @@ class _A01ScreenState extends ConsumerState<A01Screen> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
         side: isSelected
-            ? BorderSide(color: Theme.of(context).primaryColor, width: 2)
+            ? BorderSide(color: const Color(0xFF176B46), width: 2)
             : BorderSide.none,
       ),
       child: ListTile(
@@ -276,7 +276,7 @@ class _A01ScreenState extends ConsumerState<A01Screen> {
           style: ElevatedButton.styleFrom(
             backgroundColor: isSelected
                 ? Colors.red[700]
-                : Theme.of(context).primaryColor,
+                : const Color(0xFF176B46),
             foregroundColor: Colors.white,
           ),
           onPressed: () {
@@ -289,7 +289,7 @@ class _A01ScreenState extends ConsumerState<A01Screen> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text(
-                        'Tối đa 3 cầu thủ. Vui lòng bỏ chọn một cầu thủ trước (MSG-06).'),
+                        'Tối đa 3 cầu thủ. Vui lòng bỏ chọn một cầu thủ trước.'),
                     duration: Duration(seconds: 2),
                   ),
                 );
@@ -330,7 +330,7 @@ class _A01ScreenState extends ConsumerState<A01Screen> {
                 ),
                 Text(
                   canContinue
-                      ? 'Đủ điều kiện so sánh (A02, A03, A04)'
+                      ? 'Đủ điều kiện so sánh'
                       : 'Cần chọn ít nhất 2 cầu thủ',
                   style: TextStyle(
                     fontSize: 12,
@@ -345,7 +345,7 @@ class _A01ScreenState extends ConsumerState<A01Screen> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               backgroundColor:
-                  canContinue ? Theme.of(context).primaryColor : Colors.grey,
+                  canContinue ? const Color(0xFF176B46) : Colors.grey,
               foregroundColor: Colors.white,
             ),
             onPressed: canContinue
@@ -354,7 +354,7 @@ class _A01ScreenState extends ConsumerState<A01Screen> {
                   }
                 : null,
             icon: const Icon(Icons.arrow_forward),
-            label: const Text('So sánh chỉ số (A02)'),
+            label: const Text('So sánh chỉ số'),
           ),
         ],
       ),

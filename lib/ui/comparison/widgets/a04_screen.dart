@@ -18,7 +18,7 @@ class A04Screen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Đánh giá theo tiêu chí (A04)'),
+        title: const Text('Đánh giá theo tiêu chí'),
         elevation: 1,
       ),
       body: Column(
@@ -52,11 +52,6 @@ class A04Screen extends ConsumerWidget {
                   const Text(
                     'Bảng điểm và Xếp hạng',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    'Điểm = Σ(trọng số × chỉ số) / 100. Điểm bằng nhau xếp cùng hạng (1, 1, 3). Thiếu dữ liệu không xếp hạng (BR-04).',
-                    style: TextStyle(fontSize: 11, color: Colors.grey),
                   ),
                   const SizedBox(height: 8),
 
@@ -122,12 +117,12 @@ class A04Screen extends ConsumerWidget {
                     Navigator.of(context).pushReplacementNamed(AppRoutes.a03);
                   },
                   icon: const Icon(Icons.arrow_back),
-                  label: const Text('Xem kỹ thuật (A03)'),
+                  label: const Text('Xem kỹ thuật'),
                 ),
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: config.isValid && selectedIds.isNotEmpty
-                        ? Theme.of(context).primaryColor
+                        ? const Color(0xFF176B46)
                         : Colors.grey,
                     foregroundColor: Colors.white,
                   ),
@@ -141,7 +136,7 @@ class A04Screen extends ConsumerWidget {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Text(
-                                      'Đã lưu kết quả so sánh vào lịch sử (E04).'),
+                                      'Đã lưu kết quả so sánh vào lịch sử.'),
                                   backgroundColor: Colors.green,
                                 ),
                               );
@@ -234,6 +229,8 @@ class A04Screen extends ConsumerWidget {
                 Row(
                   children: [
                     TextButton(
+                      style: TextButton.styleFrom(
+                          foregroundColor: const Color(0xFF176B46)),
                       onPressed: () {
                         ref
                             .read(a04ConfigProvider.notifier)
@@ -242,6 +239,8 @@ class A04Screen extends ConsumerWidget {
                       child: const Text('Mặc định'),
                     ),
                     TextButton(
+                      style: TextButton.styleFrom(
+                          foregroundColor: const Color(0xFF176B46)),
                       onPressed: () {
                         ref
                             .read(a04ConfigProvider.notifier)
@@ -272,21 +271,23 @@ class A04Screen extends ConsumerWidget {
                       ),
                     ),
                     IconButton(
+                      color: const Color(0xFF176B46),
                       icon: const Icon(Icons.remove_circle_outline, size: 20),
                       onPressed: w > 0
                           ? () {
                               ref
                                   .read(a04ConfigProvider.notifier)
-                                  .updateWeight(key, -5);
+                                  .updateWeight(key, -1);
                             }
                           : null,
                     ),
                     Expanded(
                       child: Slider(
+                        activeColor: const Color(0xFF176B46),
                         value: w.toDouble(),
                         min: 0,
                         max: 100,
-                        divisions: 20, // Nấc 5%
+                        divisions: 100, // Nấc 1%
                         label: '$w%',
                         onChanged: (val) {
                           ref
@@ -296,12 +297,13 @@ class A04Screen extends ConsumerWidget {
                       ),
                     ),
                     IconButton(
+                      color: const Color(0xFF176B46),
                       icon: const Icon(Icons.add_circle_outline, size: 20),
                       onPressed: w < 100
                           ? () {
                               ref
                                   .read(a04ConfigProvider.notifier)
-                                  .updateWeight(key, 5);
+                                  .updateWeight(key, 1);
                             }
                           : null,
                     ),
@@ -339,7 +341,7 @@ class A04Screen extends ConsumerWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'Tổng trọng số đang là $totalWeight%, cần đúng 100% mới tính điểm (MSG-07). Nút "Chuẩn hóa 100%" sẽ tự động chia lại.',
+              'Tổng trọng số đang là $totalWeight%, cần đúng 100% mới tính điểm. Nút "Chuẩn hóa 100%" sẽ tự động chia lại.',
               style: TextStyle(color: Colors.red[900], fontSize: 13),
             ),
           ),

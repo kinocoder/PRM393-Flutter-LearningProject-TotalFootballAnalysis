@@ -44,6 +44,10 @@ class AuthService {
     await user.sendEmailVerification();
   }
 
+  Stream<User?> userChanges() => _auth.userChanges();
+
+  Future<void> signOut() => _auth.signOut();
+
   String? get currentUserEmail => _auth.currentUser?.email;
 
   Future<bool> reloadAndCheckEmailVerified() async {
