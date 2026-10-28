@@ -6,8 +6,6 @@ import 'package:united2/data/repositories/auth_repository.dart';
 
 part 'login_view_model.g.dart';
 
-enum LoginResult { requiresEmailVerification, authenticated }
-
 @riverpod
 class LoginViewModel extends _$LoginViewModel {
   @override
@@ -15,37 +13,22 @@ class LoginViewModel extends _$LoginViewModel {
     return;
   }
 
-  Future<LoginResult?> login({
-    required String email,
-    required String password,
-  }) async {
+  Future<void> login({required String email, required String password}) async {
     // 1. Chặn gửi lặp.
-    if (state.isLoading) return null;
+    if (state.isLoading) return;
     // 2. Chuyển sang loading.
     state = const AsyncLoading();
 
     // 3. Gọi repository.login().
     final repository = ref.read(authRepositoryProvider);
 
-    LoginResult? loginResult;
     final result = await AsyncValue.guard<void>(() async {
-      final credential = await repository.login(
-        email: email,
-        password: password,
-      );
-      final user = credential.user;
-      if (user == null) {
-        throw StateError('Không nhận được thông tin người dùng');
-      }
-      loginResult = user.emailVerified
-          ? LoginResult.authenticated
-          : LoginResult.requiresEmailVerification;
+      await repository.login(email: email, password: password);
     });
 
-    if (!ref.mounted) return null;
+    if (!ref.mounted) return;
 
     state = result;
-    return result.hasError ? null : loginResult;
   }
 
   String getLoginErrorMessage(Object error) {

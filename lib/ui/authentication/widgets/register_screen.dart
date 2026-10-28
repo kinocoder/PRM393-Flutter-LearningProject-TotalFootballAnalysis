@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../view_models/register_view_model.dart';
-import 'package:united2/utils/validators/email_validator.dart';
 
-import 'package:united2/routing/app_routes.dart';
+import 'package:united2/utils/validators/email_validator.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -126,7 +125,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   );
 
                               //kiểm tra màn hình còn tồn tại sau khi chờ ko
-                              if (!mounted) return;
+                              if (!context.mounted) return;
 
                               // Đọc trạng thái mới nhất sau đăng ký.
                               final result = ref.read(
@@ -146,8 +145,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 return;
                               }
 
-                              Navigator.of(context)
-                                  .pushReplacementNamed(AppRoutes.verifyEmail);
+                              // Session routing reacts to the repository stream.
                             },
                       child: registerState.isLoading
                           ? const SizedBox(
