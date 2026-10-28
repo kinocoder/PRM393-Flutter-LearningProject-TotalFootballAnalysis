@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../utils/text_normalize.dart';
 import '../model/player.dart';
+import '../model/player_query.dart';
 import '../model/skill.dart';
 part 'player_repository.g.dart';
 
@@ -246,5 +247,65 @@ class PlayerRepository {
       final fullName = normalizeForSearch(player.fullName);
       return name.contains(keyword) || fullName.contains(keyword);
     }).toList();
+  }
+
+  /// Lấy danh sách các giá trị thuộc tính thực tế có trong dữ liệu (BR-11)
+  Map<String, List<String>> getFilterOptions() {
+    final positions = <String>{};
+    final nations = <String>{};
+    final clubs = <String>{};
+    final versions = <String>{};
+
+    for (final p in players) {
+      if (p.position.isNotEmpty) positions.add(p.position);
+      if (p.nation.isNotEmpty) nations.add(p.nation);
+      if (p.club.isNotEmpty) clubs.add(p.club);
+      if (p.cardVersion.isNotEmpty) versions.add(p.cardVersion);
+    }
+
+    return {
+      'positions': positions.toList()..sort(),
+      'nations': nations.toList()..sort(),
+      'clubs': clubs.toList()..sort(),
+      'cardVersions': versions.toList()..sort(),
+    };
+  }
+
+  /// Lọc và đếm số lượng cầu thủ khớp với PlayerQuery
+  List<Player> filterPlayers(PlayerQuery query) {
+    var result = List<Player>.from(players);
+
+    // Lọc theo danh sách vị trí
+    if (query.positions.isNotEmpty) {
+      result = result.where((p) => query.positions.contains(p.position)).toList();
+    }
+    // Lọc quốc gia
+    if (query.nation != null && query.nation!.isNotEmpty) {
+      result = result.where((p) => p.nation == query.nation).toList();
+    }
+    // Lọc CLB
+    if (query.club != null && query.club!.isNotEmpty) {
+      result = result.where((p) => p.club == query.club).toList();
+    }
+    // Lọc mùa thẻ
+    if (query.cardVersion != null && query.cardVersion!.isNotEmpty) {
+      result = result.where((p) => p.cardVersion == query.cardVersion).toList();
+    }
+    // Lọc OVR tối thiểu
+    if (query.minOvr != null) {
+      result = result.where((p) => p.ovr >= query.minOvr!).toList();
+    }
+
+    // Sắp xếp kết quả
+    if (query.sort == 'ovr_asc') {
+      result.sort((a, b) => a.ovr.compareTo(b.ovr));
+    } else if (query.sort == 'name_asc') {
+      result.sort((a, b) => a.name.compareTo(b.name));
+    } else {
+      // Mặc định: ovr_desc
+      result.sort((a, b) => b.ovr.compareTo(a.ovr));
+    }
+
+    return result;
   }
 }

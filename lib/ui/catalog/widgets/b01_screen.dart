@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/model/player.dart';
+import '../../../routing/app_routes.dart';
 import '../view_models/b01_view_model.dart';
 
 class B01Screen extends ConsumerWidget {
@@ -35,11 +36,15 @@ class B01Screen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.search, color: Colors.black87),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushNamed(context, AppRoutes.b02);
+            },
           ),
           IconButton(
             icon: const Icon(Icons.tune, color: Colors.black87),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushNamed(context, AppRoutes.b03);
+            },
           ),
         ],
       ),
