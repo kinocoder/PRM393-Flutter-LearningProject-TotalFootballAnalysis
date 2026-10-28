@@ -222,31 +222,41 @@ class A04Screen extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Điều chỉnh trọng số chỉ số',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                const Expanded(
+                  child: Text(
+                    'Điều chỉnh trọng số chỉ số',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
                 Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     TextButton(
                       style: TextButton.styleFrom(
-                          foregroundColor: const Color(0xFF176B46)),
+                        foregroundColor: const Color(0xFF176B46),
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        minimumSize: const Size(50, 30),
+                      ),
                       onPressed: () {
                         ref
                             .read(a04ConfigProvider.notifier)
                             .resetToDefaults();
                       },
-                      child: const Text('Mặc định'),
+                      child: const Text('Mặc định', style: TextStyle(fontSize: 12)),
                     ),
                     TextButton(
                       style: TextButton.styleFrom(
-                          foregroundColor: const Color(0xFF176B46)),
+                        foregroundColor: const Color(0xFF176B46),
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        minimumSize: const Size(50, 30),
+                      ),
                       onPressed: () {
                         ref
                             .read(a04ConfigProvider.notifier)
                             .normalizeWeights();
                       },
-                      child: const Text('Chuẩn hóa 100%'),
+                      child: const Text('Chuẩn hóa 100%', style: TextStyle(fontSize: 12)),
                     ),
                   ],
                 ),
