@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../../routing/app_routes.dart';
 import '../../authentication/view_models/logout_view_model.dart';
 import '../view_models/home_view_model.dart';
