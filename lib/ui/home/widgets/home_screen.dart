@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../../routing/app_routes.dart';
-import '../../authentication/widgets/avatar_upload_test_screen.dart';
 import '../../authentication/view_models/logout_view_model.dart';
 import '../view_models/home_view_model.dart';
 import 'account_menu.dart';
@@ -78,19 +76,6 @@ class HomeScreen extends ConsumerWidget {
                       spacing: 16,
                       runSpacing: 16,
                       children: [
-                        _FeatureCard(
-                          width: width,
-                          icon: Icons.groups_outlined,
-                          title: 'Test Cloudinary Upload',
-                          description:
-                              'Kiểm tra tải ảnh avatar lên Cloudinary.',
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute<void>(
-                              builder: (_) => const AvatarUploadTestScreen(),
-                            ),
-                          ),
-                        ),
                         _FeatureCard(
                           width: width,
                           icon: Icons.groups_outlined,
