@@ -104,7 +104,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       false;
                                   if (!isValid) return;
 
-                                  final result = await ref
+                                  await ref
                                       .read(loginViewModelProvider.notifier)
                                       .login(
                                         email: _userName.text.trim(),
@@ -113,28 +113,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                                   if (!context.mounted) return;
 
-                                  if (result == null) {
-                                    final state = ref.read(
-                                      loginViewModelProvider,
+                                  final state = ref.read(
+                                    loginViewModelProvider,
+                                  );
+                                  if (state.hasError) {
+                                    final message = ref
+                                        .read(loginViewModelProvider.notifier)
+                                        .getLoginErrorMessage(state.error!);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text(message)),
                                     );
-                                    if (state.hasError) {
-                                      final message = ref
-                                          .read(loginViewModelProvider.notifier)
-                                          .getLoginErrorMessage(state.error!);
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                            SnackBar(content: Text(message)),
-                                          );
-                                    }
-                                    return;
                                   }
-
-                                  final route =
-                                      result == LoginResult.authenticated
-                                      ? AppRoutes.home
-                                      : AppRoutes.verifyEmail;
-                                  Navigator.of(context)
-                                      .pushReplacementNamed(route);
+                                  // Session routing reacts to the repository stream.
                                 },
                           child: loginState.isLoading
                               ? const SizedBox(
