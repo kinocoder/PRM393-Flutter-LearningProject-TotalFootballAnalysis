@@ -1,13 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../authentication/view_models/auth_session_view_model.dart';
+import '../../authentication/view_models/user_profile_view_model.dart';
 
 final homeViewModelProvider = Provider.autoDispose<HomeViewModel>((ref) {
   final session = ref.watch(authSessionProvider).asData?.value;
-  final name = session?.name?.trim() ?? '';
+  final loadedProfile = session == null
+      ? null
+      : ref.watch(userProfileViewModelProvider).asData?.value;
+  final profile = loadedProfile?.uid == session?.uid ? loadedProfile : null;
+  final name = (profile?.displayName ?? session?.name)?.trim() ?? '';
   final email = session?.email?.trim() ?? '';
   final emailName = email.split('@').first;
-  final avatar = session?.avatarUrl?.trim();
+  final avatar = (profile != null ? profile.avatarUrl : session?.avatarUrl)
+      ?.trim();
   return HomeViewModel(
     displayName: name.isNotEmpty
         ? name

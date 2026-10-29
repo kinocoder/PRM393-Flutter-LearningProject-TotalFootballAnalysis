@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../routing/app_routes.dart';
+import '../../authentication/widgets/avatar_upload_test_screen.dart';
 import '../../authentication/view_models/logout_view_model.dart';
 import '../view_models/home_view_model.dart';
 import 'account_menu.dart';
@@ -13,17 +14,6 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final account = ref.watch(homeViewModelProvider);
     final logout = ref.watch(logoutViewModelProvider);
-    ref.listen(logoutViewModelProvider, (previous, next) {
-      if (next.hasError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              ref.read(logoutViewModelProvider.notifier).errorMessage,
-            ),
-          ),
-        );
-      }
-    });
     return Scaffold(
       backgroundColor: const Color(0xFFF5F8F6),
       appBar: AppBar(
@@ -34,12 +24,7 @@ class HomeScreen extends ConsumerWidget {
           overflow: TextOverflow.ellipsis,
         ),
         actions: [
-          AccountMenu(
-            account: account,
-            isSigningOut: logout.isLoading,
-            onSignOut: () =>
-                ref.read(logoutViewModelProvider.notifier).signOut(),
-          ),
+          AccountMenu(account: account, isSigningOut: logout.isLoading),
         ],
       ),
       body: SafeArea(
@@ -93,6 +78,19 @@ class HomeScreen extends ConsumerWidget {
                       spacing: 16,
                       runSpacing: 16,
                       children: [
+                        _FeatureCard(
+                          width: width,
+                          icon: Icons.groups_outlined,
+                          title: 'Test Cloudinary Upload',
+                          description:
+                              'Kiểm tra tải ảnh avatar lên Cloudinary.',
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute<void>(
+                              builder: (_) => const AvatarUploadTestScreen(),
+                            ),
+                          ),
+                        ),
                         _FeatureCard(
                           width: width,
                           icon: Icons.groups_outlined,

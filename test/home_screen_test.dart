@@ -1,3 +1,6 @@
+import 'package:united2/data/model/user_profile.dart';
+import 'package:united2/ui/authentication/view_models/user_profile_view_model.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -6,16 +9,28 @@ import 'package:united2/routing/app_routes.dart';
 import 'package:united2/ui/authentication/view_models/auth_session_view_model.dart';
 import 'package:united2/ui/home/widgets/home_screen.dart';
 
+class RecoveredTestProfile extends UserProfileViewModel {
+  @override
+  Future<UserProfile> build() async => const UserProfile(
+    uid: 'one',
+    email: 'player@example.com',
+    displayName: 'Player',
+  );
+}
+
 void main() {
   Future<void> mount(WidgetTester tester, AuthSession user) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          userProfileViewModelProvider.overrideWith(RecoveredTestProfile.new),
           authSessionProvider.overrideWith((ref) => Stream.value(user)),
         ],
         child: MaterialApp(
           home: const HomeScreen(),
           routes: {
+            AppRoutes.userProfile: (_) =>
+                const Scaffold(body: Text('Profile destination')),
             AppRoutes.b01: (_) => const Scaffold(body: Text('B01 destination')),
             AppRoutes.b02: (_) => const Scaffold(body: Text('B02 destination')),
           },
@@ -25,9 +40,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('Account menu shows email fallback and read-only details', (
-    tester,
-  ) async {
+  testWidgets('Account menu opens profile', (tester) async {
     await mount(
       tester,
       const AuthSession(
@@ -41,22 +54,16 @@ void main() {
     expect(find.byIcon(Icons.person_outline), findsOneWidget);
     await tester.tap(find.byTooltip('Tài khoản'));
     await tester.pumpAndSettle();
-    expect(find.text('Đăng xuất'), findsOneWidget);
+    expect(find.text('Đăng xuất'), findsNothing);
     await tester.tap(find.text('Chi tiết tài khoản'));
     await tester.pumpAndSettle();
-    expect(find.text('player@example.com'), findsOneWidget);
-    expect(find.text('Đã xác minh email'), findsOneWidget);
-    await tester.tap(find.byTooltip('Đóng'));
-    await tester.pumpAndSettle();
-    expect(find.text('Chi tiết tài khoản'), findsNothing);
+    expect(find.text('Profile destination'), findsOneWidget);
   });
 
-  testWidgets('Two cards share a row and navigate to existing named routes', (
-    tester,
-  ) async {
+  testWidgets('Three cards navigate to existing routes', (tester) async {
     await mount(tester, const AuthSession(uid: '1', emailVerified: true));
     final cards = find.byType(Card);
-    expect(cards, findsNWidgets(2));
+    expect(cards, findsNWidgets(3));
     expect(
       tester.getTopLeft(cards.at(0)).dy,
       tester.getTopLeft(cards.at(1)).dy,
