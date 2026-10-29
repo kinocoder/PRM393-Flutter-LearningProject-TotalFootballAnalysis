@@ -1,3 +1,7 @@
+import 'package:united2/data/model/user_profile.dart';
+import 'package:united2/ui/authentication/view_models/user_profile_view_model.dart';
+import 'package:united2/ui/authentication/widgets/user_profile_screen.dart';
+
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -13,6 +17,15 @@ import 'package:united2/ui/authentication/view_models/verify_email_view_model.da
 import 'package:united2/ui/authentication/widgets/login_screen.dart';
 import 'package:united2/ui/authentication/widgets/verify_email_screen.dart';
 import 'package:united2/ui/home/widgets/home_screen.dart';
+
+class RecoveredTestProfile extends UserProfileViewModel {
+  @override
+  Future<UserProfile> build() async => const UserProfile(
+    uid: 'one',
+    email: 'player@example.com',
+    displayName: 'Player',
+  );
+}
 
 const verified = AuthSession(uid: 'one', emailVerified: true);
 const unverified = AuthSession(uid: 'one', emailVerified: false);
@@ -89,7 +102,10 @@ class FakeAuthRepository implements AuthRepository {
 Future<void> mount(WidgetTester tester, FakeAuthRepository repo) async {
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [authRepositoryProvider.overrideWithValue(repo)],
+      overrides: [
+        authRepositoryProvider.overrideWithValue(repo),
+        userProfileViewModelProvider.overrideWith(RecoveredTestProfile.new),
+      ],
       child: const FootballApp(),
     ),
   );
@@ -248,20 +264,21 @@ void main() {
     await repo.events.close();
   });
 
-  testWidgets('Failed logout stays at Home; retry succeeds', (tester) async {
+  testWidgets('Failed logout stays at Profile; retry succeeds', (tester) async {
     final repo = FakeAuthRepository()..failLogout = true;
     await mount(tester, repo);
     repo.events.add(verified);
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Tài khoản'));
     await tester.pumpAndSettle();
+    await tester.tap(find.text('Chi tiết tài khoản'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Đăng xuất'));
     await tester.pumpAndSettle();
-    expect(find.byType(HomeScreen), findsOneWidget);
+    expect(find.byType(UserProfileScreen), findsOneWidget);
     expect(find.text('Không thể đăng xuất. Vui lòng thử lại.'), findsOneWidget);
     repo.failLogout = false;
-    await tester.tap(find.byTooltip('Tài khoản'));
-    await tester.pumpAndSettle();
+
     await tester.tap(find.text('Đăng xuất'));
     await tester.pumpAndSettle();
     expect(find.byType(LoginScreen), findsOneWidget);
@@ -273,7 +290,10 @@ void main() {
   test('Logout command prevents repeated requests', () async {
     final repo = FakeAuthRepository()..logoutPending = Completer<void>();
     final container = ProviderContainer(
-      overrides: [authRepositoryProvider.overrideWithValue(repo)],
+      overrides: [
+        authRepositoryProvider.overrideWithValue(repo),
+        userProfileViewModelProvider.overrideWith(RecoveredTestProfile.new),
+      ],
     );
     final vm = container.read(logoutViewModelProvider.notifier);
     final pending = vm.signOut();
@@ -292,7 +312,10 @@ void main() {
     () async {
       final repo = FakeAuthRepository()..sendPending = Completer<void>();
       final container = ProviderContainer(
-        overrides: [authRepositoryProvider.overrideWithValue(repo)],
+        overrides: [
+          authRepositoryProvider.overrideWithValue(repo),
+          userProfileViewModelProvider.overrideWith(RecoveredTestProfile.new),
+        ],
       );
       final subscription = container.listen(
         verifyEmailViewModelProvider,

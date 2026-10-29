@@ -11,6 +11,7 @@ import '../ui/catalog/widgets/b01_screen.dart';
 import '../ui/catalog/widgets/b02_screen.dart';
 import '../ui/catalog/widgets/b03_screen.dart';
 import 'app_routes.dart';
+import '../ui/authentication/widgets/user_profile_screen.dart';
 
 /// Named-route configuration and session access policy; no Firebase calls.
 class AppRouter {
@@ -67,6 +68,7 @@ class AppRouter {
       AppRoutes.register ||
       AppRoutes.forgotPassword ||
       AppRoutes.verifyEmail => const HomeScreen(),
+      AppRoutes.userProfile => const UserProfileScreen(),
       AppRoutes.b01 => const B01Screen(),
       AppRoutes.b02 => const B02Screen(),
       AppRoutes.b03 => const B03Screen(),
