@@ -92,10 +92,10 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                     onPressed: isLoading ? null : _checkEmailVerified,
                     child: action == VerificationAction.checking
                         ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
                         : const Text('Tôi đã xác minh'),
                   ),
                 ),

@@ -5,6 +5,7 @@ import '../../authentication/view_models/logout_view_model.dart';
 import '../view_models/home_view_model.dart';
 import 'account_menu.dart';
 
+
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -96,6 +97,17 @@ class HomeScreen extends ConsumerWidget {
                               ? null
                               : () =>
                                     Navigator.pushNamed(context, AppRoutes.b02),
+                        ),
+                        _FeatureCard(
+                          width: constraints.maxWidth,
+                          icon: Icons.compare_arrows,
+                          title: 'So sánh cầu thủ',
+                          description:
+                          'So sánh chỉ số, kỹ thuật và đánh giá cầu thủ.',
+                          onTap: logout.isLoading
+                              ? null
+                              : () =>
+                              Navigator.pushNamed(context, AppRoutes.a01),
                         ),
                       ],
                     );

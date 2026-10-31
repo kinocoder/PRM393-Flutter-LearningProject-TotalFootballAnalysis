@@ -85,9 +85,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       onPressed: loginState.isLoading
                           ? null
                           : () {
-                              Navigator.of(context)
-                                  .pushNamed(AppRoutes.forgotPassword);
-                            },
+                        Navigator.of(context)
+                            .pushNamed(AppRoutes.forgotPassword);
+                      },
                       child: const Text('Quên mật khẩu?'),
                     ),
                   ),
@@ -99,10 +99,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           onPressed: loginState.isLoading
                               ? null
                               : () async {
-                                  final isValid =
-                                      _formKey.currentState?.validate() ??
-                                      false;
-                                  if (!isValid) return;
+                            final isValid =
+                                _formKey.currentState?.validate() ??
+                                    false;
+                            if (!isValid) return;
 
                                   await ref
                                       .read(loginViewModelProvider.notifier)
@@ -111,7 +111,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                         password: _password.text,
                                       );
 
-                                  if (!context.mounted) return;
+                            if (!context.mounted) return;
 
                                   final state = ref.read(
                                     loginViewModelProvider,
@@ -128,12 +128,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 },
                           child: loginState.isLoading
                               ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                            ),
+                          )
                               : const Text('Đăng nhập'),
                         ),
                       ),

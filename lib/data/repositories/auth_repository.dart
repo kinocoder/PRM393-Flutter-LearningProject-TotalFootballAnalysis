@@ -15,7 +15,7 @@ class AuthRepository {
   final AuthService _authService;
 
   AuthRepository({required AuthService authService})
-    : _authService = authService;
+      : _authService = authService;
 
   //Quên mật khẩu
   Future<void> sendPasswordResetEmail({required String email}) {

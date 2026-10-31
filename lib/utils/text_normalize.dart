@@ -14,7 +14,10 @@ String normalizeForSearch(String input) {
   };
 
   for (final entry in vietnameseMap.entries) {
-    str = str.replaceAll(RegExp(entry.value), entry.key);
+    final replacement = entry.key;
+    for (final char in entry.value.runes) {
+      str = str.replaceAll(String.fromCharCode(char), replacement);
+    }
   }
 
   // 2. Loại bỏ các ký tự dấu tổ hợp Unicode U+0300 đến U+036F
