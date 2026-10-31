@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 
+import '../../../routing/app_routes.dart';
 import '../view_models/home_view_model.dart';
 
-enum _AccountAction { details, logout }
+enum _AccountAction { details }
 
 class AccountMenu extends StatelessWidget {
   const AccountMenu({
     super.key,
     required this.account,
     required this.isSigningOut,
-    required this.onSignOut,
   });
   final HomeViewModel account;
   final bool isSigningOut;
-  final VoidCallback onSignOut;
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +23,7 @@ class AccountMenu extends StatelessWidget {
       onSelected: (action) {
         switch (action) {
           case _AccountAction.details:
-            _showDetails(context);
-          case _AccountAction.logout:
-            onSignOut();
+            Navigator.pushNamed(context, AppRoutes.userProfile);
         }
       },
       itemBuilder: (_) => const [
@@ -36,15 +33,6 @@ class AccountMenu extends StatelessWidget {
             contentPadding: EdgeInsets.zero,
             leading: Icon(Icons.account_circle_outlined),
             title: Text('Chi tiết tài khoản'),
-          ),
-        ),
-        PopupMenuDivider(),
-        PopupMenuItem(
-          value: _AccountAction.logout,
-          child: ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: Icon(Icons.logout),
-            title: Text('Đăng xuất'),
           ),
         ),
       ],
@@ -81,69 +69,12 @@ class AccountMenu extends StatelessWidget {
       ),
     );
   }
-
-  void _showDetails(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      showDragHandle: true,
-      builder: (context) => SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                children: [
-                  const Expanded(
-                    child: Text(
-                      'Chi tiết tài khoản',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    tooltip: 'Đóng',
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Center(child: _Avatar(url: account.avatarUrl, size: 72)),
-              const SizedBox(height: 20),
-              const Text('Tên hiển thị'),
-              SelectableText(
-                account.displayName,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text('Email'),
-              SelectableText(
-                account.email,
-                style: const TextStyle(fontSize: 16),
-              ),
-              const SizedBox(height: 16),
-              Text(account.verificationLabel),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 class _Avatar extends StatelessWidget {
-  const _Avatar({required this.url, this.size = 36});
+  const _Avatar({required this.url});
   final String? url;
-  final double size;
+  final double size = 36;
 
   @override
   Widget build(BuildContext context) {

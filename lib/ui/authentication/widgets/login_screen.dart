@@ -104,28 +104,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     false;
                             if (!isValid) return;
 
-                            await ref
-                                .read(loginViewModelProvider.notifier)
-                                .login(
-                              email: _userName.text.trim(),
-                              password: _password.text,
-                            );
+                                  await ref
+                                      .read(loginViewModelProvider.notifier)
+                                      .login(
+                                        email: _userName.text.trim(),
+                                        password: _password.text,
+                                      );
 
                             if (!context.mounted) return;
 
-                            final state = ref.read(
-                              loginViewModelProvider,
-                            );
-                            if (state.hasError) {
-                              final message = ref
-                                  .read(loginViewModelProvider.notifier)
-                                  .getLoginErrorMessage(state.error!);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(message)),
-                              );
-                            }
-                            // Session routing reacts to the repository stream.
-                          },
+                                  final state = ref.read(
+                                    loginViewModelProvider,
+                                  );
+                                  if (state.hasError) {
+                                    final message = ref
+                                        .read(loginViewModelProvider.notifier)
+                                        .getLoginErrorMessage(state.error!);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text(message)),
+                                    );
+                                  }
+                                  // Session routing reacts to the repository stream.
+                                },
                           child: loginState.isLoading
                               ? const SizedBox(
                             width: 20,

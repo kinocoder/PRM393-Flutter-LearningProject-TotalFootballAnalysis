@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../routing/app_routes.dart';
-
-import '../../../routing/app_routes.dart';
 import '../../authentication/view_models/logout_view_model.dart';
 import '../view_models/home_view_model.dart';
 import 'account_menu.dart';
+
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -14,17 +13,6 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final account = ref.watch(homeViewModelProvider);
     final logout = ref.watch(logoutViewModelProvider);
-    ref.listen(logoutViewModelProvider, (previous, next) {
-      if (next.hasError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              ref.read(logoutViewModelProvider.notifier).errorMessage,
-            ),
-          ),
-        );
-      }
-    });
     return Scaffold(
       backgroundColor: const Color(0xFFF5F8F6),
       appBar: AppBar(
@@ -35,12 +23,7 @@ class HomeScreen extends ConsumerWidget {
           overflow: TextOverflow.ellipsis,
         ),
         actions: [
-          AccountMenu(
-            account: account,
-            isSigningOut: logout.isLoading,
-            onSignOut: () =>
-                ref.read(logoutViewModelProvider.notifier).signOut(),
-          ),
+          AccountMenu(account: account, isSigningOut: logout.isLoading),
         ],
       ),
       body: SafeArea(
@@ -99,11 +82,11 @@ class HomeScreen extends ConsumerWidget {
                           icon: Icons.groups_outlined,
                           title: 'Danh mục cầu thủ',
                           description:
-                          'Khám phá danh sách và thông tin cầu thủ.',
+                              'Khám phá danh sách và thông tin cầu thủ.',
                           onTap: logout.isLoading
                               ? null
                               : () =>
-                              Navigator.pushNamed(context, AppRoutes.b01),
+                                    Navigator.pushNamed(context, AppRoutes.b01),
                         ),
                         _FeatureCard(
                           width: width,
@@ -113,18 +96,7 @@ class HomeScreen extends ConsumerWidget {
                           onTap: logout.isLoading
                               ? null
                               : () =>
-                              Navigator.pushNamed(context, AppRoutes.b02),
-                        ),
-                        _FeatureCard(
-                          width: constraints.maxWidth,
-                          icon: Icons.compare_arrows,
-                          title: 'So sánh cầu thủ',
-                          description:
-                          'So sánh chỉ số, kỹ thuật và đánh giá cầu thủ.',
-                          onTap: logout.isLoading
-                              ? null
-                              : () =>
-                              Navigator.pushNamed(context, AppRoutes.a01),
+                                    Navigator.pushNamed(context, AppRoutes.b02),
                         ),
                       ],
                     );

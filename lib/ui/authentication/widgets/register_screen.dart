@@ -124,8 +124,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           password: _passwordController.text,
                         );
 
-                        //kiểm tra màn hình còn tồn tại sau khi chờ ko
-                        if (!context.mounted) return;
+                              //kiểm tra màn hình còn tồn tại sau khi chờ ko
+                              if (!context.mounted) return;
 
                         // Đọc trạng thái mới nhất sau đăng ký.
                         final result = ref.read(
@@ -145,8 +145,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           return;
                         }
 
-                        // Session routing reacts to the repository stream.
-                      },
+                              // Session routing reacts to the repository stream.
+                            },
                       child: registerState.isLoading
                           ? const SizedBox(
                         width: 20,
