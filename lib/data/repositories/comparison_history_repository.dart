@@ -1,10 +1,12 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import '../../data/model/comparison_record.dart';
 
 part 'comparison_history_repository.g.dart';
 
 /// Provider cấp phát đối tượng ComparisonHistoryRepository cho toàn ứng dụng
-@riverpod
+/// keepAlive để lịch sử vẫn còn khi người dùng rời A04 và mở E04.
+@Riverpod(keepAlive: true)
 ComparisonHistoryRepository comparisonHistoryRepository(Ref ref) {
   return ComparisonHistoryRepository();
 }
