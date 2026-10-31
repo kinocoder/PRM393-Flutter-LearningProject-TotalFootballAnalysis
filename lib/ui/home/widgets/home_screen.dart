@@ -98,6 +98,17 @@ class HomeScreen extends ConsumerWidget {
                               : () =>
                                     Navigator.pushNamed(context, AppRoutes.b02),
                         ),
+                        _FeatureCard(
+                          width: constraints.maxWidth,
+                          icon: Icons.compare_arrows,
+                          title: 'So sánh cầu thủ',
+                          description:
+                          'So sánh chỉ số, kỹ thuật và đánh giá cầu thủ.',
+                          onTap: logout.isLoading
+                              ? null
+                              : () =>
+                              Navigator.pushNamed(context, AppRoutes.a01),
+                        ),
                       ],
                     );
                   },
