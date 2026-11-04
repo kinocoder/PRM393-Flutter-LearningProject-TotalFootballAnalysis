@@ -135,9 +135,9 @@ class _B02ScreenState extends ConsumerState<B02Screen> {
           player: player,
           onTap: () {
             Navigator.pushNamed(
-                context,
-                AppRoutes.b04,
-                arguments: player.id,
+              context,
+              AppRoutes.b04,
+              arguments: player.id,
             );
           },
         );

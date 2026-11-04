@@ -110,12 +110,12 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                             : _sendResetEmail,
                         child: forgotPasswordState.isLoading
                             ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                          ),
+                        )
                             : const Text('Gửi email khôi phục'),
                       ),
                       const SizedBox(height: 8),

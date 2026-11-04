@@ -10,6 +10,11 @@ import '../ui/home/widgets/home_screen.dart';
 import '../ui/catalog/widgets/b01_screen.dart';
 import '../ui/catalog/widgets/b02_screen.dart';
 import '../ui/catalog/widgets/b03_screen.dart';
+import '../ui/comparison/widgets/a01_screen.dart';
+import '../ui/comparison/widgets/a02_screen.dart';
+import '../ui/comparison/widgets/a03_screen.dart';
+import '../ui/comparison/widgets/a04_screen.dart';
+import 'app_routes.dart';
 import 'app_routes.dart';
 import '../ui/authentication/widgets/user_profile_screen.dart';
 
@@ -68,10 +73,14 @@ class AppRouter {
       AppRoutes.register ||
       AppRoutes.forgotPassword ||
       AppRoutes.verifyEmail => const HomeScreen(),
-      AppRoutes.userProfile => const UserProfileScreen(),
       AppRoutes.b01 => const B01Screen(),
       AppRoutes.b02 => const B02Screen(),
       AppRoutes.b03 => const B03Screen(),
+      AppRoutes.a01 => const A01Screen(),
+      AppRoutes.a02 => const A02Screen(),
+      AppRoutes.a03 => const A03Screen(),
+      AppRoutes.a04 => const A04Screen(),
+      AppRoutes.userProfile => const UserProfileScreen(),
       _ => Scaffold(
         appBar: AppBar(title: const Text('Chức năng')),
         body: const Center(child: Text('Chức năng chưa được triển khai.')),
