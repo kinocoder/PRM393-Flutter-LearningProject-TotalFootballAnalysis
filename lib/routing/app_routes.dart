@@ -13,4 +13,5 @@ class AppRoutes {
   static const b02 = '/B02';
   static const b03 = '/B03';
   static const b04 = '/B04';
+  static const c01 = '/C01';
 }

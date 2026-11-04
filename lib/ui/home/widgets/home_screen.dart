@@ -132,6 +132,18 @@ class HomeScreen extends ConsumerWidget {
                                   ),
                                 ),
                         ),
+                        _FeatureCard(
+                          width: width,
+                          height: width,
+                          compact: true,
+                          icon: Icons.sports_soccer,
+                          title: 'Đội hình',
+                          description: 'Tạo đội hình và xếp cầu thủ theo sơ đồ.',
+                          onTap: logout.isLoading
+                              ? null
+                              : () =>
+                                    Navigator.pushNamed(context, AppRoutes.c01),
+                        ),
                       ],
                     );
                   },
