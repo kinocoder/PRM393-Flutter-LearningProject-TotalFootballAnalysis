@@ -23,7 +23,9 @@ class C01ViewModel extends _$C01ViewModel {
 
   Future<void> refresh() async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(() => _fetchLineups());
+    final result = await AsyncValue.guard(() => _fetchLineups());
+    // Người dùng có thể đã rời màn hình trong lúc đọc SQLite
+    if (ref.mounted) state = result;
   }
 
   //Tên đội hình: không rỗng, tối đa 30 ký tự
@@ -49,18 +51,18 @@ class C01ViewModel extends _$C01ViewModel {
       updatedAt: now,
     );
     await ref.read(lineupRepositoryProvider).saveLineup(lineup);
-    await refresh();
+    if (ref.mounted) await refresh();
     return lineup;
   }
 
   Future<void> renameLineup(Lineup lineup, String name) async {
     final renamed = lineup.copyWith(name: name.trim(), updatedAt: DateTime.now());
     await ref.read(lineupRepositoryProvider).saveLineup(renamed);
-    await refresh();
+    if (ref.mounted) await refresh();
   }
 
   Future<void> deleteLineup(Lineup lineup) async {
     await ref.read(lineupRepositoryProvider).deleteLineup(lineup);
-    await refresh();
+    if (ref.mounted) await refresh();
   }
 }

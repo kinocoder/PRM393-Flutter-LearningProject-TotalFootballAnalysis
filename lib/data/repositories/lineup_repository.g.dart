@@ -53,4 +53,4 @@ final class LineupRepositoryProvider
   }
 }
 
-String _$lineupRepositoryHash() => r'40f8689b086fd7cdfd1b2def391bbe51728fe030';
+String _$lineupRepositoryHash() => r'c68ce3f62e98cc2426b690f2d94b7295078fde6e';

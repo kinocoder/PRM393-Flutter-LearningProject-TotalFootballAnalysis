@@ -62,9 +62,19 @@ class C01Screen extends ConsumerWidget {
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(
-          child: Text(
-            'Lỗi tải dữ liệu: $error',
-            style: const TextStyle(color: Colors.red),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Lỗi tải dữ liệu: $error',
+                style: const TextStyle(color: Colors.red),
+              ),
+              TextButton(
+                onPressed: () =>
+                    ref.read(c01ViewModelProvider.notifier).refresh(),
+                child: const Text('Thử lại'),
+              ),
+            ],
           ),
         ),
       ),
@@ -76,11 +86,21 @@ class C01Screen extends ConsumerWidget {
     final name = await _askName(context, ref, '');
     if (name == null) return;
 
-    final lineup = await ref
-        .read(c01ViewModelProvider.notifier)
-        .createLineup(name);
-    if (!context.mounted) return;
-    _openC04(context, lineup.id);
+    try {
+      final lineup = await ref
+          .read(c01ViewModelProvider.notifier)
+          .createLineup(name);
+      if (!context.mounted) return;
+      _openC04(context, lineup.id);
+    } catch (_) {
+      if (context.mounted) _showError(context, 'Không tạo được đội hình');
+    }
+  }
+
+  void _showError(BuildContext context, String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   void _openC04(BuildContext context, String lineupId) {
@@ -96,7 +116,11 @@ class C01Screen extends ConsumerWidget {
   ) async {
     final name = await _askName(context, ref, lineup.name);
     if (name == null) return;
-    await ref.read(c01ViewModelProvider.notifier).renameLineup(lineup, name);
+    try {
+      await ref.read(c01ViewModelProvider.notifier).renameLineup(lineup, name);
+    } catch (_) {
+      if (context.mounted) _showError(context, 'Không đổi được tên đội hình');
+    }
   }
 
   //Xoá phải hỏi lại; bấm Huỷ thì giữ nguyên
@@ -111,7 +135,11 @@ class C01Screen extends ConsumerWidget {
       message: 'Đội hình "${lineup.name}" sẽ bị xoá.',
     );
     if (!confirmed) return;
-    await ref.read(c01ViewModelProvider.notifier).deleteLineup(lineup);
+    try {
+      await ref.read(c01ViewModelProvider.notifier).deleteLineup(lineup);
+    } catch (_) {
+      if (context.mounted) _showError(context, 'Không xoá được đội hình');
+    }
   }
 
   //Hộp thoại nhập tên; trả về null nếu bấm Huỷ

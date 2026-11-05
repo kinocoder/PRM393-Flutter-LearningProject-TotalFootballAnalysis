@@ -1,5 +1,19 @@
 // Sơ đồ đội hình (C02) và các vị trí trên sân.
 
+/// Vị trí thi đấu → các vị trí được coi là đúng khi xếp vào (SRS UC-09).
+const Map<String, List<String>> _acceptedRolesByRole = {
+  'GK': ['GK'],
+  'LB': ['LB', 'LWB'],
+  'CB': ['CB'],
+  'RB': ['RB', 'RWB'],
+  'CM': ['CM', 'CDM', 'CAM'],
+  'LM': ['LM', 'LW'],
+  'RM': ['RM', 'RW'],
+  'LW': ['LW', 'LM', 'LF'],
+  'RW': ['RW', 'RM', 'RF'],
+  'ST': ['ST', 'CF'],
+};
+
 /// Một vị trí trên sân.
 /// [x], [y] tính theo phần trăm (0–100) của sân: y = 0 là phía khung thành đối phương.
 class FormationSlot {
@@ -14,6 +28,9 @@ class FormationSlot {
     required this.x,
     required this.y,
   });
+
+  /// Cầu thủ đá một trong các vị trí này thì không bị coi là lệch vị trí.
+  List<String> get acceptedRoles => _acceptedRolesByRole[role] ?? [role];
 }
 
 class Formation {
