@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/model/formation.dart';
 import '../../../data/model/lineup.dart';
 import '../../../data/model/player.dart';
-import '../view_models/c03_view_model.dart';
 import '../view_models/c04_view_model.dart';
 import 'c02_screen.dart';
 import 'c03_screen.dart';
@@ -20,6 +19,7 @@ class C04Screen extends ConsumerWidget {
     final lineupState = ref.watch(c04ViewModelProvider(lineupId));
     final viewModel = ref.read(c04ViewModelProvider(lineupId).notifier);
     final players = ref.watch(c04PlayersProvider).value ?? [];
+    final ownedIds = ref.watch(c04OwnedIdsProvider).value;
 
     return lineupState.when(
       data: (lineup) => PopScope(
@@ -61,7 +61,7 @@ class C04Screen extends ConsumerWidget {
               PitchView(
                 formation: lineup.formation,
                 slotBuilder: (slot) =>
-                    _buildSlot(context, ref, lineup, slot, players),
+                    _buildSlot(context, ref, lineup, slot, players, ownedIds),
               ),
             ],
           ),
@@ -71,7 +71,18 @@ class C04Screen extends ConsumerWidget {
           const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (error, _) => Scaffold(
         appBar: AppBar(),
-        body: Center(child: Text('Lỗi: $error')),
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Lỗi: $error'),
+              TextButton(
+                onPressed: () => ref.invalidate(c04ViewModelProvider(lineupId)),
+                child: const Text('Thử lại'),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -82,6 +93,7 @@ class C04Screen extends ConsumerWidget {
     Lineup lineup,
     FormationSlot slot,
     List<Player> players,
+    Set<String>? ownedIds,
   ) {
     final playerId = lineup.slots[slot.id];
 
@@ -98,14 +110,23 @@ class C04Screen extends ConsumerWidget {
     for (final p in players) {
       if (p.id == playerId) player = p;
     }
-    // Lệch vị trí thì tô màu cam để cảnh báo
-    final canPlay = player != null && canPlayRole(player, slot.role);
+    final status = slotStatusOf(
+      playerId: playerId,
+      player: player,
+      slot: slot,
+      ownedIds: ownedIds,
+    );
 
     return SlotChip(
       label: player == null ? '?' : '${player.ovr}',
       caption: player?.name ?? playerId,
-      color: canPlay ? Colors.white : Colors.orange,
-      onTap: () => _showSlotMenu(context, ref, slot),
+      // Đỏ: không còn sở hữu; cam: lệch vị trí; trắng: bình thường
+      color: switch (status) {
+        SlotStatus.notOwned => Colors.red,
+        SlotStatus.wrongPosition => Colors.orange,
+        SlotStatus.ok => Colors.white,
+      },
+      onTap: () => _showSlotMenu(context, ref, slot, status),
     );
   }
 
@@ -114,20 +135,29 @@ class C04Screen extends ConsumerWidget {
       MaterialPageRoute(
         builder: (_) => C03Screen(
           lineupId: lineupId,
-          slotId: slot.id,
-          role: slot.role,
+          slot: slot,
         ),
       ),
     );
   }
 
   //Vị trí đã có người: chọn Thay cầu thủ hoặc Bỏ trống
-  void _showSlotMenu(BuildContext context, WidgetRef ref, FormationSlot slot) {
+  void _showSlotMenu(
+    BuildContext context,
+    WidgetRef ref,
+    FormationSlot slot,
+    SlotStatus status,
+  ) {
     showModalBottomSheet<void>(
       context: context,
       builder: (sheetContext) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          if (status == SlotStatus.notOwned)
+            const ListTile(
+              leading: Icon(Icons.warning, color: Colors.red),
+              title: Text('Cầu thủ này không còn trong bộ sưu tập'),
+            ),
           ListTile(
             leading: const Icon(Icons.swap_horiz),
             title: const Text('Thay cầu thủ'),
@@ -152,11 +182,26 @@ class C04Screen extends ConsumerWidget {
   }
 
   Future<void> _save(BuildContext context, C04ViewModel viewModel) async {
-    await viewModel.save();
-    if (!context.mounted) return;
+    final saved = await _trySave(context, viewModel);
+    if (!saved || !context.mounted) return;
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('Đã lưu đội hình')));
+  }
+
+  //Lưu lỗi thì báo cho người dùng; bản đang sửa vẫn còn nguyên để lưu lại
+  Future<bool> _trySave(BuildContext context, C04ViewModel viewModel) async {
+    try {
+      await viewModel.save();
+      return true;
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Không lưu được đội hình, hãy thử lại')),
+        );
+      }
+      return false;
+    }
   }
 
   //Thoát khi chưa lưu: hỏi Lưu / Bỏ thay đổi / Ở lại
@@ -188,8 +233,8 @@ class C04Screen extends ConsumerWidget {
     if (!context.mounted) return;
 
     if (choice == 'save') {
-      await viewModel.save();
-      if (context.mounted) Navigator.pop(context);
+      final saved = await _trySave(context, viewModel);
+      if (saved && context.mounted) Navigator.pop(context);
     } else if (choice == 'discard') {
       viewModel.discardChanges();
       Navigator.pop(context);

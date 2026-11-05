@@ -3,10 +3,12 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../data/model/formation.dart';
 import '../../../data/model/lineup.dart';
 import '../../../data/model/player.dart';
+import '../../../data/repositories/collection_repository.dart';
 import '../../../data/repositories/current_user_provider.dart';
 import '../../../data/repositories/lineup_repository.dart';
 import '../../../data/repositories/player_repository.dart';
 import 'c01_view_model.dart';
+import 'c03_view_model.dart';
 part 'c04_view_model.g.dart';
 
 /// Thông tin cầu thủ để hiện trên sân. Lấy cả danh mục, vì cầu thủ đã xếp
@@ -14,6 +16,34 @@ part 'c04_view_model.g.dart';
 @riverpod
 Future<List<Player>> c04Players(Ref ref) {
   return ref.watch(playerRepositoryProvider).getPlayers();
+}
+
+/// ID các cầu thủ người dùng còn sở hữu (bộ sưu tập của mảng E).
+@riverpod
+Future<Set<String>> c04OwnedIds(Ref ref) async {
+  final uid = ref.watch(currentUidProvider);
+  final repository = ref.read(collectionRepositoryProvider);
+  final entries = await repository.getCollection(uid);
+  return {for (final entry in entries) entry.playerId};
+}
+
+/// Trạng thái một vị trí đã có cầu thủ, để C04 tô màu cảnh báo.
+enum SlotStatus { ok, wrongPosition, notOwned }
+
+//[ownedIds] = null nghĩa là chưa tải xong bộ sưu tập, chưa cảnh báo vội
+SlotStatus slotStatusOf({
+  required String playerId,
+  required Player? player,
+  required FormationSlot slot,
+  required Set<String>? ownedIds,
+}) {
+  if (ownedIds != null && !ownedIds.contains(playerId)) {
+    return SlotStatus.notOwned;
+  }
+  if (player == null || !canPlaySlot(player, slot)) {
+    return SlotStatus.wrongPosition;
+  }
+  return SlotStatus.ok;
 }
 
 /// C04 — Đội hình đang sửa trên sân.

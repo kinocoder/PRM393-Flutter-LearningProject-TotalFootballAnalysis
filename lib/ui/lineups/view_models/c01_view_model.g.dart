@@ -36,7 +36,7 @@ final class C01ViewModelProvider
   C01ViewModel create() => C01ViewModel();
 }
 
-String _$c01ViewModelHash() => r'f6957a1b1cd5c89cb37acbaf1c92a8d506848c98';
+String _$c01ViewModelHash() => r'a2f34347a6be7fddf725d437ab8cce14d5c9d736';
 
 /// C01 — Danh sách đội hình.
 

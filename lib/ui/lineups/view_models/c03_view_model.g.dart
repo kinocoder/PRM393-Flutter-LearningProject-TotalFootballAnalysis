@@ -45,7 +45,7 @@ final class C03ViewModelProvider
   C03ViewModel create() => C03ViewModel();
 }
 
-String _$c03ViewModelHash() => r'b541f1747b348b332d396cf1af9aa0494f8a4291';
+String _$c03ViewModelHash() => r'353681002b81eeaa58df83a486657fa71a85c0cb';
 
 /// C03 — Chọn cầu thủ cho một vị trí.
 ///
