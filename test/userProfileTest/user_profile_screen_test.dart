@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:united2/data/model/avatar_failure.dart';
 import 'package:united2/data/model/user_profile.dart';
 import 'package:united2/data/repositories/profile_repository.dart';
 import 'package:united2/ui/authentication/view_models/user_profile_view_model.dart';
@@ -171,7 +173,10 @@ void main() {
   ) async {
     await mount(tester);
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(find.text('Khôi phục avatar mặc định'), 200);
+    await tester.scrollUntilVisible(
+      find.text('Khôi phục avatar mặc định'),
+      200,
+    );
     await tester.tap(find.text('Khôi phục avatar mặc định'));
     await tester.pumpAndSettle();
     expect(repo.resets, 1);
@@ -180,6 +185,45 @@ void main() {
     await tester.scrollUntilVisible(find.byIcon(Icons.person), -200);
     expect(find.byIcon(Icons.person), findsOneWidget);
   });
+
+  for (final error in <Object>[
+    const AvatarUploadException('Tải ảnh quá thời gian chờ.'),
+    AvatarSaveException(
+      uid: 'one',
+      avatarUrl: 'https://example.test/new.png',
+      avatarPublicId: 'new-image',
+      cause: StateError('write failed'),
+    ),
+    AvatarSaveException(
+      uid: 'one',
+      avatarUrl: 'https://example.test/new.png',
+      avatarPublicId: 'new-image',
+      cause: TimeoutException('write pending'),
+      timedOut: true,
+    ),
+  ]) {
+    testWidgets('Avatar error is shown and retry reloads: $error', (
+      tester,
+    ) async {
+      await mount(tester);
+      await tester.pumpAndSettle();
+      repo.mutationError = error;
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(UserProfileScreen)),
+      );
+      await container
+          .read(userProfileViewModelProvider.notifier)
+          .updateAvatar(XFile('never-read.png'));
+      await tester.pumpAndSettle();
+      expect(find.text('Lỗi hồ sơ: $error'), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(find.text('Đã cập nhật ảnh đại diện.'), findsNothing);
+      await tester.tap(find.text('Thử lại'));
+      await tester.pumpAndSettle();
+      expect(find.text('Player'), findsOneWidget);
+      expect(repo.uploads, 1, reason: 'Retry reloads profile; never reuploads');
+    });
+  }
 
   testWidgets('Profile displays local creation and update timestamps', (
     tester,
