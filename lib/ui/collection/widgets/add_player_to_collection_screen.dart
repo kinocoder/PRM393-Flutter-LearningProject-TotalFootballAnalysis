@@ -6,7 +6,11 @@ import '../view_models/collection_view_models.dart';
 import 'collection_player_card.dart';
 
 class AddPlayerToCollectionScreen extends ConsumerStatefulWidget {
-  const AddPlayerToCollectionScreen({super.key});
+  /// [initialPlayerId] được dùng khi màn khác muốn mở E02 cho một cầu thủ đã
+  /// biết trước. Nếu null, E02 hoạt động như cũ: tìm trong toàn bộ danh mục.
+  const AddPlayerToCollectionScreen({super.key, this.initialPlayerId});
+
+  final String? initialPlayerId;
 
   @override
   ConsumerState<AddPlayerToCollectionScreen> createState() =>
@@ -20,49 +24,79 @@ class _AddPlayerToCollectionScreenState
   @override
   Widget build(BuildContext context) {
     final candidates = ref.watch(collectionCandidatesProvider);
+    final collectionEntries = ref.watch(myCollectionProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Thêm cầu thủ')),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              onChanged: (value) =>
-                  setState(() => _query = value.trim().toLowerCase()),
-              decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.search),
-                hintText: 'Tìm theo tên cầu thủ',
-                border: OutlineInputBorder(),
-              ),
-            ),
-          ),
-          Expanded(
-            child: candidates.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, _) =>
-                  Center(child: Text('Không tải được cầu thủ: $error')),
-              data: (players) {
-                final filtered = players.where(_matchesQuery).toList();
-                if (filtered.isEmpty) {
-                  return const Center(
-                    child: Text('Không tìm thấy cầu thủ phù hợp.'),
-                  );
-                }
-                return ListView.builder(
-                  itemCount: filtered.length,
-                  itemBuilder: (context, index) => CollectionPlayerCard(
-                    player: filtered[index],
-                    trailing: IconButton(
-                      tooltip: 'Thêm vào bộ sưu tập',
-                      icon: const Icon(Icons.add_circle_outline),
-                      onPressed: () => _showAddDialog(filtered[index]),
+      appBar: AppBar(
+        title: Text(
+          widget.initialPlayerId == null
+              ? 'Thêm cầu thủ'
+              : 'Xác nhận thêm cầu thủ',
+        ),
+      ),
+      body: collectionEntries.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) =>
+            Center(child: Text('Không tải được bộ sưu tập: $error')),
+        data: (entries) {
+          final addedPlayerIds = entries.map((entry) => entry.playerId).toSet();
+          return Column(
+            children: [
+              if (widget.initialPlayerId == null)
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: TextField(
+                    onChanged: (value) =>
+                        setState(() => _query = value.trim().toLowerCase()),
+                    decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.search),
+                      hintText: 'Tìm theo tên cầu thủ',
+                      border: OutlineInputBorder(),
                     ),
                   ),
-                );
-              },
-            ),
-          ),
-        ],
+                ),
+              Expanded(
+                child: candidates.when(
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (error, _) =>
+                      Center(child: Text('Không tải được cầu thủ: $error')),
+                  data: (players) {
+                    final filtered = widget.initialPlayerId == null
+                        ? players.where(_matchesQuery).toList()
+                        : players
+                              .where(
+                                (player) => player.id == widget.initialPlayerId,
+                              )
+                              .toList();
+                    if (filtered.isEmpty) {
+                      return Center(
+                        child: Text(
+                          widget.initialPlayerId == null
+                              ? 'Không tìm thấy cầu thủ phù hợp.'
+                              : 'Không tìm thấy cầu thủ được chọn.',
+                        ),
+                      );
+                    }
+                    return ListView.builder(
+                      itemCount: filtered.length,
+                      itemBuilder: (context, index) => CollectionPlayerCard(
+                        player: filtered[index],
+                        trailing: addedPlayerIds.contains(filtered[index].id)
+                            ? const _AlreadyInCollectionLabel()
+                            : IconButton(
+                                tooltip: 'Thêm vào bộ sưu tập',
+                                icon: const Icon(Icons.add_circle_outline),
+                                onPressed: () =>
+                                    _showAddDialog(filtered[index]),
+                              ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -92,7 +126,20 @@ class _AddPlayerToCollectionScreenState
         ),
       ),
     );
-    if (added) Navigator.pop(context);
+  }
+}
+
+class _AlreadyInCollectionLabel extends StatelessWidget {
+  const _AlreadyInCollectionLabel();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Chip(
+      avatar: Icon(Icons.check_circle, size: 16, color: Color(0xFF176B46)),
+      label: Text('Đã có'),
+      visualDensity: VisualDensity.compact,
+      side: BorderSide.none,
+    );
   }
 }
 

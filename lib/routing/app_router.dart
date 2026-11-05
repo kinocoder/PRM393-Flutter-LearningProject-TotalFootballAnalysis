@@ -14,6 +14,7 @@ import '../ui/comparison/widgets/a01_screen.dart';
 import '../ui/comparison/widgets/a02_screen.dart';
 import '../ui/comparison/widgets/a03_screen.dart';
 import '../ui/comparison/widgets/a04_screen.dart';
+import '../ui/lineups/widgets/c01_screen.dart';
 import 'app_routes.dart';
 import 'app_routes.dart';
 import '../ui/authentication/widgets/user_profile_screen.dart';
@@ -80,6 +81,7 @@ class AppRouter {
       AppRoutes.a02 => const A02Screen(),
       AppRoutes.a03 => const A03Screen(),
       AppRoutes.a04 => const A04Screen(),
+      AppRoutes.c01 => const C01Screen(),
       AppRoutes.userProfile => const UserProfileScreen(),
       _ => Scaffold(
         appBar: AppBar(title: const Text('Chức năng')),
