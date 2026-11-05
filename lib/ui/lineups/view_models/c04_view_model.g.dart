@@ -55,6 +55,50 @@ final class C04PlayersProvider
 
 String _$c04PlayersHash() => r'8ef03923366caeaaf7d62a748b17f3f87a614adb';
 
+/// ID các cầu thủ người dùng còn sở hữu (bộ sưu tập của mảng E).
+
+@ProviderFor(c04OwnedIds)
+final c04OwnedIdsProvider = C04OwnedIdsProvider._();
+
+/// ID các cầu thủ người dùng còn sở hữu (bộ sưu tập của mảng E).
+
+final class C04OwnedIdsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<Set<String>>,
+          Set<String>,
+          FutureOr<Set<String>>
+        >
+    with $FutureModifier<Set<String>>, $FutureProvider<Set<String>> {
+  /// ID các cầu thủ người dùng còn sở hữu (bộ sưu tập của mảng E).
+  C04OwnedIdsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'c04OwnedIdsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$c04OwnedIdsHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<Set<String>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<Set<String>> create(Ref ref) {
+    return c04OwnedIds(ref);
+  }
+}
+
+String _$c04OwnedIdsHash() => r'83e428214004934cb6e404a5800692ba6435c17e';
+
 /// C04 — Đội hình đang sửa trên sân.
 ///
 /// C02 (đổi sơ đồ) và C03 (chọn cầu thủ) cũng sửa vào đây.
