@@ -16,23 +16,24 @@ final profileAuthProvider = Provider<FirebaseAuth>(
 @riverpod
 class UserProfileViewModel extends _$UserProfileViewModel {
   @override
-  Future<UserProfile> build() async {
+  Future<UserProfile> build(String uid) async {
     final user = ref.read(profileAuthProvider).currentUser;
 
-    if (user == null) {
+    if (user == null || user.uid != uid) {
       throw StateError('Người dùng chưa đăng nhập');
     }
 
     final repository = ref.read(profileRepositoryProvider);
-    final profile = await repository.getProfile(user.uid);
+    final profile = await repository.getProfile(uid);
 
     if (profile != null) {
       return profile;
     }
 
     // Hỗ trợ tài khoản đã đăng ký trước khi tạo Firestore.
+    _requireCurrentSession();
     final newProfile = UserProfile(
-      uid: user.uid,
+      uid: uid,
       email: user.email ?? '',
       displayName: user.displayName ?? user.email?.split('@').first ?? 'Player',
     );
@@ -41,15 +42,28 @@ class UserProfileViewModel extends _$UserProfileViewModel {
       await repository.createProfile(newProfile);
     } on StateError {
       // Một yêu cầu khác có thể đã tạo hồ sơ trước đó.
-      final existing = await repository.getProfile(user.uid);
+      _requireCurrentSession();
+      final existing = await repository.getProfile(uid);
       if (existing != null) return existing;
       rethrow;
     }
 
-    return await repository.getProfile(user.uid) ?? newProfile;
+    _requireCurrentSession();
+    return await repository.getProfile(uid) ?? newProfile;
+  }
+
+// Listener còn được giữ lại có thể khiến provider của UID này tiếp tục tồn tại sau khi đăng xuất.
+  bool get _isCurrentSession =>
+      ref.mounted && ref.read(profileAuthProvider).currentUser?.uid == uid;
+
+  void _requireCurrentSession() {
+    if (!_isCurrentSession) {
+      throw StateError('Phiên đăng nhập đã thay đổi');
+    }
   }
 
   Future<void> updateDisplayName(String displayName) async {
+    if (!_isCurrentSession) return;
     final previous = state.value;
     if (previous == null || state.isLoading) return;
 
@@ -60,13 +74,15 @@ class UserProfileViewModel extends _$UserProfileViewModel {
 
       await repository.updateDisplayName(previous.uid, displayName);
 
+      _requireCurrentSession();
       return await repository.getProfile(previous.uid) ??
           (throw StateError('Không tìm thấy hồ sơ người dùng'));
     });
-    if (ref.mounted) state = result;
+    if (_isCurrentSession) state = result;
   }
 
   Future<void> updateAvatar(XFile image) async {
+    if (!_isCurrentSession) return;
     final previous = state.value;
     if (previous == null || state.isLoading) return;
 
@@ -77,13 +93,15 @@ class UserProfileViewModel extends _$UserProfileViewModel {
 
       await repository.updateAvatar(previous.uid, image);
 
+      _requireCurrentSession();
       return await repository.getProfile(previous.uid) ??
           (throw StateError('Không tìm thấy hồ sơ người dùng'));
     });
-    if (ref.mounted) state = result;
+    if (_isCurrentSession) state = result;
   }
 
   Future<void> resetAvatar() async {
+    if (!_isCurrentSession) return;
     final previous = state.value;
     if (previous == null || state.isLoading) return;
 
@@ -94,9 +112,10 @@ class UserProfileViewModel extends _$UserProfileViewModel {
 
       await repository.resetAvatar(previous.uid);
 
+      _requireCurrentSession();
       return await repository.getProfile(previous.uid) ??
           (throw StateError('Không tìm thấy hồ sơ người dùng'));
     });
-    if (ref.mounted) state = result;
+    if (_isCurrentSession) state = result;
   }
 }

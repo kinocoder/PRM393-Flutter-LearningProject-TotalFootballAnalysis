@@ -29,7 +29,7 @@ void main() {
         profileAuthProvider.overrideWithValue(auth),
         profileRepositoryProvider.overrideWithValue(repo),
       ],
-      child: const MaterialApp(home: UserProfileScreen()),
+      child: const MaterialApp(home: UserProfileScreen(uid: 'one')),
     ),
   );
   Future<void> edit(WidgetTester tester) async {
@@ -171,7 +171,10 @@ void main() {
   ) async {
     await mount(tester);
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(find.text('Khôi phục avatar mặc định'), 200);
+    await tester.scrollUntilVisible(
+      find.text('Khôi phục avatar mặc định'),
+      200,
+    );
     await tester.tap(find.text('Khôi phục avatar mặc định'));
     await tester.pumpAndSettle();
     expect(repo.resets, 1);

@@ -16,7 +16,6 @@ import '../ui/comparison/widgets/a03_screen.dart';
 import '../ui/comparison/widgets/a04_screen.dart';
 import '../ui/lineups/widgets/c01_screen.dart';
 import 'app_routes.dart';
-import 'app_routes.dart';
 import '../ui/authentication/widgets/user_profile_screen.dart';
 
 /// Named-route configuration and session access policy; no Firebase calls.
@@ -82,7 +81,10 @@ class AppRouter {
       AppRoutes.a03 => const A03Screen(),
       AppRoutes.a04 => const A04Screen(),
       AppRoutes.c01 => const C01Screen(),
-      AppRoutes.userProfile => const UserProfileScreen(),
+      AppRoutes.userProfile => UserProfileScreen(
+        key: ValueKey(user.uid),
+        uid: user.uid,
+      ),
       _ => Scaffold(
         appBar: AppBar(title: const Text('Chức năng')),
         body: const Center(child: Text('Chức năng chưa được triển khai.')),

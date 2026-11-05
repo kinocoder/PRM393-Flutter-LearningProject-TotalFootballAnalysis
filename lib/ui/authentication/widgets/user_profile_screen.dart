@@ -6,7 +6,9 @@ import '../view_models/user_profile_view_model.dart';
 import '../view_models/logout_view_model.dart';
 
 class UserProfileScreen extends ConsumerStatefulWidget {
-  const UserProfileScreen({super.key});
+  const UserProfileScreen({super.key, required this.uid});
+
+  final String uid;
 
   @override
   ConsumerState<UserProfileScreen> createState() => _UserProfileScreen();
@@ -18,7 +20,7 @@ class _UserProfileScreen extends ConsumerState<UserProfileScreen> {
 
   void _showSuccess(String message) {
     if (!mounted) return;
-    final state = ref.read(userProfileViewModelProvider);
+    final state = ref.read(userProfileViewModelProvider(widget.uid));
     if (state.isLoading || state.hasError || !state.hasValue) return;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
@@ -55,7 +57,9 @@ class _UserProfileScreen extends ConsumerState<UserProfileScreen> {
 
       if (image == null || !mounted) return;
 
-      await ref.read(userProfileViewModelProvider.notifier).updateAvatar(image);
+      await ref
+          .read(userProfileViewModelProvider(widget.uid).notifier)
+          .updateAvatar(image);
       _showSuccess('Đã cập nhật ảnh đại diện.');
     } catch (error) {
       if (!mounted) return;
@@ -103,14 +107,14 @@ class _UserProfileScreen extends ConsumerState<UserProfileScreen> {
     if (newName == null || newName == currentName || !mounted) return;
 
     await ref
-        .read(userProfileViewModelProvider.notifier)
+        .read(userProfileViewModelProvider(widget.uid).notifier)
         .updateDisplayName(newName);
     _showSuccess('Đã cập nhật tên hiển thị.');
   }
 
   @override
   Widget build(BuildContext context) {
-    final profileState = ref.watch(userProfileViewModelProvider);
+    final profileState = ref.watch(userProfileViewModelProvider(widget.uid));
     final logout = ref.watch(logoutViewModelProvider);
     ref.listen(logoutViewModelProvider, (previous, next) {
       if (next.hasError && !next.isLoading) {
@@ -124,7 +128,7 @@ class _UserProfileScreen extends ConsumerState<UserProfileScreen> {
       }
     });
 
-    ref.listen(userProfileViewModelProvider, (previous, next) {
+    ref.listen(userProfileViewModelProvider(widget.uid), (previous, next) {
       if (!mounted) return;
 
       if (next.hasError && !next.isLoading) {
@@ -163,7 +167,7 @@ class _UserProfileScreen extends ConsumerState<UserProfileScreen> {
               const SizedBox(height: 12),
               FilledButton(
                 onPressed: () {
-                  ref.invalidate(userProfileViewModelProvider);
+                  ref.invalidate(userProfileViewModelProvider(widget.uid));
                 },
                 child: const Text('Thử lại'),
               ),
@@ -224,7 +228,7 @@ class _UserProfileScreen extends ConsumerState<UserProfileScreen> {
               OutlinedButton.icon(
                 onPressed: () async {
                   await ref
-                      .read(userProfileViewModelProvider.notifier)
+                      .read(userProfileViewModelProvider(widget.uid).notifier)
                       .resetAvatar();
                   _showSuccess('Đã khôi phục ảnh đại diện mặc định.');
                 },

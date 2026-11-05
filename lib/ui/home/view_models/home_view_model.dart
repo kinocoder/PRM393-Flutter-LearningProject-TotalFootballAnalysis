@@ -7,7 +7,7 @@ final homeViewModelProvider = Provider.autoDispose<HomeViewModel>((ref) {
   final session = ref.watch(authSessionProvider).asData?.value;
   final loadedProfile = session == null
       ? null
-      : ref.watch(userProfileViewModelProvider).asData?.value;
+      : ref.watch(userProfileViewModelProvider(session.uid)).asData?.value;
   final profile = loadedProfile?.uid == session?.uid ? loadedProfile : null;
   final name = (profile?.displayName ?? session?.name)?.trim() ?? '';
   final email = session?.email?.trim() ?? '';

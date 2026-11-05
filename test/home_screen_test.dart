@@ -11,7 +11,7 @@ import 'package:united2/ui/home/widgets/home_screen.dart';
 
 class RecoveredTestProfile extends UserProfileViewModel {
   @override
-  Future<UserProfile> build() async => const UserProfile(
+  Future<UserProfile> build(String uid) async => const UserProfile(
     uid: 'one',
     email: 'player@example.com',
     displayName: 'Player',
