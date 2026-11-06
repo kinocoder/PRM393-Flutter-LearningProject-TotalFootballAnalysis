@@ -168,7 +168,11 @@ class _PlayerTile extends StatelessWidget {
         size: 20,
       ),
       onTap: () {
-        // Mở chi tiết cầu thủ
+        Navigator.pushNamed(
+          context,
+          AppRoutes.b04,
+          arguments: player.id,
+        );
       },
     );
   }
