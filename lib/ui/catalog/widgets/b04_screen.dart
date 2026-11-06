@@ -1,3 +1,4 @@
+// lib/ui/catalog/widgets/b04_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/model/player.dart';
@@ -156,19 +157,7 @@ class B04Screen extends ConsumerWidget {
         padding: const EdgeInsets.all(16.0),
         child: Row(
           children: [
-            Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: Colors.amber.shade700,
-                shape: BoxShape.circle,
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                '${player.ovr}',
-                style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            ),
+            _buildPlayerAvatar(player),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
@@ -209,6 +198,72 @@ class B04Screen extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildPlayerAvatar(Player player) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          width: 68,
+          height: 68,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.grey.shade200,
+            border: Border.all(color: Colors.amber.shade700, width: 2),
+          ),
+          child: ClipOval(
+            child: player.image.isNotEmpty
+                ? (player.image.startsWith('http')
+                    ? Image.network(
+                        player.image,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(
+                          Icons.person,
+                          size: 40,
+                          color: Colors.grey,
+                        ),
+                      )
+                    : Image.asset(
+                        player.image,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(
+                          Icons.person,
+                          size: 40,
+                          color: Colors.grey,
+                        ),
+                      ))
+                : const Icon(
+                    Icons.person,
+                    size: 40,
+                    color: Colors.grey,
+                  ),
+          ),
+        ),
+        Positioned(
+          right: -4,
+          bottom: -4,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: Colors.amber.shade700,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.white, width: 1.5),
+            ),
+            child: Text(
+              '${player.ovr}',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
