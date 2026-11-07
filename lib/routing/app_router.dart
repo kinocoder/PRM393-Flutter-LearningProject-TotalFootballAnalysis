@@ -83,7 +83,10 @@ class AppRouter {
       AppRoutes.a03 => const A03Screen(),
       AppRoutes.a04 => const A04Screen(),
       AppRoutes.c01 => const C01Screen(),
-      AppRoutes.userProfile => const UserProfileScreen(),
+      AppRoutes.userProfile => UserProfileScreen(
+        key: ValueKey(user.uid),
+        uid: user.uid,
+      ),
       _ => Scaffold(
         appBar: AppBar(title: const Text('Chức năng')),
         body: const Center(child: Text('Chức năng chưa được triển khai.')),

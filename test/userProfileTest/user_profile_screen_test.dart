@@ -31,7 +31,7 @@ void main() {
         profileAuthProvider.overrideWithValue(auth),
         profileRepositoryProvider.overrideWithValue(repo),
       ],
-      child: const MaterialApp(home: UserProfileScreen()),
+      child: const MaterialApp(home: UserProfileScreen(uid: 'one')),
     ),
   );
   Future<void> edit(WidgetTester tester) async {

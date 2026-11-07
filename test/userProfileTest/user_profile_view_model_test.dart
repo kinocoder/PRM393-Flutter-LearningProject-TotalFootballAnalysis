@@ -37,11 +37,11 @@ void main() {
   });
   Future<UserProfile> load() {
     container.listen(
-      userProfileViewModelProvider,
+      userProfileViewModelProvider('one'),
       (_, next) => states.add(next),
       fireImmediately: true,
     );
-    return container.read(userProfileViewModelProvider.future);
+    return container.read(userProfileViewModelProvider('one').future);
   }
 
   test(
@@ -49,7 +49,10 @@ void main() {
     () async {
       when(() => auth.currentUser).thenReturn(null);
       await expectLater(load(), throwsStateError);
-      expect(container.read(userProfileViewModelProvider).hasError, isTrue);
+      expect(
+        container.read(userProfileViewModelProvider('one')).hasError,
+        isTrue,
+      );
       expect(repo.reads, 0);
     },
   );
@@ -114,16 +117,19 @@ void main() {
       () async {
         await load();
         repo.pending = Completer<void>();
-        final vm = container.read(userProfileViewModelProvider.notifier);
+        final vm = container.read(userProfileViewModelProvider('one').notifier);
         final work = invoke(vm);
-        expect(container.read(userProfileViewModelProvider).isLoading, isTrue);
+        expect(
+          container.read(userProfileViewModelProvider('one')).isLoading,
+          isTrue,
+        );
         await vm.updateDisplayName('duplicate');
         await vm.updateAvatar(image);
         await vm.resetAvatar();
         expect(repo.names + repo.uploads + repo.resets, 1);
         repo.pending!.complete();
         await work;
-        final result = container.read(userProfileViewModelProvider);
+        final result = container.read(userProfileViewModelProvider('one'));
         expect(result, isA<AsyncData<UserProfile>>());
         expect(result.value, same(repo.profile));
         expect(repo.lastUid, 'one');
@@ -139,9 +145,17 @@ void main() {
       await load();
       final error = StateError('$action failed');
       repo.mutationError = error;
-      await invoke(container.read(userProfileViewModelProvider.notifier));
-      expect(container.read(userProfileViewModelProvider).error, same(error));
-      expect(container.read(userProfileViewModelProvider).isLoading, isFalse);
+      await invoke(
+        container.read(userProfileViewModelProvider('one').notifier),
+      );
+      expect(
+        container.read(userProfileViewModelProvider('one')).error,
+        same(error),
+      );
+      expect(
+        container.read(userProfileViewModelProvider('one')).isLoading,
+        isFalse,
+      );
     });
     test(
       'V09 $action completing after provider disposal does not throw',
@@ -149,7 +163,7 @@ void main() {
         await load();
         repo.pending = Completer<void>();
         final work = invoke(
-          container.read(userProfileViewModelProvider.notifier),
+          container.read(userProfileViewModelProvider('one').notifier),
         );
         container.dispose();
         repo.pending!.complete();
@@ -159,9 +173,11 @@ void main() {
     test('V10 $action deleted profile reports meaningful error', () async {
       await load();
       repo.disappearAfterWrite = true;
-      await invoke(container.read(userProfileViewModelProvider.notifier));
+      await invoke(
+        container.read(userProfileViewModelProvider('one').notifier),
+      );
       expect(
-        container.read(userProfileViewModelProvider).error,
+        container.read(userProfileViewModelProvider('one')).error,
         isA<StateError>(),
       );
     });
@@ -169,7 +185,7 @@ void main() {
   test('V11 commands ignored during initial loading', () async {
     repo.readPending = Completer<void>();
     final loading = load();
-    final vm = container.read(userProfileViewModelProvider.notifier);
+    final vm = container.read(userProfileViewModelProvider('one').notifier);
     await vm.updateDisplayName('New');
     await vm.updateAvatar(image);
     await vm.resetAvatar();
@@ -193,10 +209,13 @@ void main() {
       final error = StateError('read unavailable');
       repo.readError = error;
       await container
-          .read(userProfileViewModelProvider.notifier)
+          .read(userProfileViewModelProvider('one').notifier)
           .updateDisplayName('New');
       expect(repo.names, 1);
-      expect(container.read(userProfileViewModelProvider).error, same(error));
+      expect(
+        container.read(userProfileViewModelProvider('one')).error,
+        same(error),
+      );
     },
   );
 }
