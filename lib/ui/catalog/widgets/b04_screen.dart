@@ -1,12 +1,12 @@
 // lib/ui/catalog/widgets/b04_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../data/model/player.dart';
 import '../../../data/repositories/collection_repository.dart';
 import '../../../data/repositories/current_user_provider.dart';
 import '../../../routing/app_routes.dart';
 import '../../collection/view_models/collection_view_models.dart';
-import '../../collection/widgets/add_player_to_collection_screen.dart';
 import '../view_models/b04_view_model.dart';
 
 class B04Screen extends ConsumerWidget {
@@ -91,7 +91,9 @@ class B04Screen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: () => ref.read(b04ViewModelProvider(playerId).notifier).refresh(),
+                  onPressed: () => ref
+                      .read(b04ViewModelProvider(playerId).notifier)
+                      .refresh(),
                   child: const Text('Thử lại'),
                 ),
               ],
@@ -106,15 +108,28 @@ class B04Screen extends ConsumerWidget {
           child: ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
             icon: const Icon(Icons.library_add_outlined),
-            label: const Text('Thêm Vào Bộ Sưu Tập Thẻ', style: TextStyle(fontSize: 16)),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const AddPlayerToCollectionScreen(),
+            label: const Text(
+              'Thêm Vào Bộ Sưu Tập Thẻ',
+              style: TextStyle(fontSize: 16),
+            ),
+            onPressed: () async {
+              final added = await ref
+                  .read(myCollectionProvider.notifier)
+                  .addPlayer(playerId);
+              if (!context.mounted) return;
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    added
+                        ? 'Đã thêm vào bộ sưu tập.'
+                        : 'Cầu thủ này đã có trong bộ sưu tập.',
+                  ),
                 ),
               );
             },
@@ -132,15 +147,24 @@ class B04Screen extends ConsumerWidget {
         children: [
           _buildHeaderCard(player),
           const SizedBox(height: 20),
-          const Text('Chỉ số chính', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const Text(
+            'Chỉ số chính',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 10),
           _buildMainStats(player),
           const SizedBox(height: 20),
-          const Text('Thông số cá nhân & Kỹ năng', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const Text(
+            'Thông số cá nhân & Kỹ năng',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 10),
           _buildPhysicalTraits(player),
           const SizedBox(height: 20),
-          const Text('Kỹ thuật đặc biệt', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const Text(
+            'Kỹ thuật đặc biệt',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 10),
           _buildSkillsSection(player),
           const SizedBox(height: 20),
@@ -165,33 +189,52 @@ class B04Screen extends ConsumerWidget {
                 children: [
                   Text(
                     player.name,
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  if (player.fullName.isNotEmpty && player.fullName != player.name)
+                  if (player.fullName.isNotEmpty &&
+                      player.fullName != player.name)
                     Text(
                       player.fullName,
-                      style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey.shade600,
+                      ),
                     ),
                   const SizedBox(height: 6),
                   Wrap(
                     spacing: 6,
                     children: [
                       Chip(
-                        label: Text(player.position, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                        label: Text(
+                          player.position,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
                         padding: EdgeInsets.zero,
                         visualDensity: VisualDensity.compact,
                         backgroundColor: Colors.blue.shade50,
                       ),
                       if (player.cardVersion.isNotEmpty)
                         Chip(
-                          label: Text(player.cardVersion, style: const TextStyle(fontSize: 12)),
+                          label: Text(
+                            player.cardVersion,
+                            style: const TextStyle(fontSize: 12),
+                          ),
                           padding: EdgeInsets.zero,
                           visualDensity: VisualDensity.compact,
                         ),
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Text('${player.club} • ${player.nation}', style: const TextStyle(fontSize: 13)),
+                  Text(
+                    '${player.club} • ${player.nation}',
+                    style: const TextStyle(fontSize: 13),
+                  ),
                 ],
               ),
             ),
@@ -216,31 +259,27 @@ class B04Screen extends ConsumerWidget {
           child: ClipOval(
             child: player.image.isNotEmpty
                 ? (player.image.startsWith('http')
-                    ? Image.network(
-                        player.image,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            const Icon(
-                          Icons.person,
-                          size: 40,
-                          color: Colors.grey,
-                        ),
-                      )
-                    : Image.asset(
-                        player.image,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            const Icon(
-                          Icons.person,
-                          size: 40,
-                          color: Colors.grey,
-                        ),
-                      ))
-                : const Icon(
-                    Icons.person,
-                    size: 40,
-                    color: Colors.grey,
-                  ),
+                      ? Image.network(
+                          player.image,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(
+                                Icons.person,
+                                size: 40,
+                                color: Colors.grey,
+                              ),
+                        )
+                      : Image.asset(
+                          player.image,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(
+                                Icons.person,
+                                size: 40,
+                                color: Colors.grey,
+                              ),
+                        ))
+                : const Icon(Icons.person, size: 40, color: Colors.grey),
           ),
         ),
         Positioned(
@@ -298,7 +337,11 @@ class B04Screen extends ConsumerWidget {
             children: [
               Text(
                 entry.key,
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade700),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade700,
+                ),
               ),
               const SizedBox(height: 4),
               Text(
@@ -306,7 +349,9 @@ class B04Screen extends ConsumerWidget {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: entry.value == null ? Colors.red.shade400 : Colors.black87,
+                  color: entry.value == null
+                      ? Colors.red.shade400
+                      : Colors.black87,
                 ),
               ),
             ],
@@ -330,9 +375,15 @@ class B04Screen extends ConsumerWidget {
           children: [
             _buildRow('Tuổi', player.age > 0 ? '${player.age}' : 'N/A'),
             const Divider(height: 12),
-            _buildRow('Thể hình', '${player.heightCm > 0 ? "${player.heightCm} cm" : "N/A"} / ${player.weightKg > 0 ? "${player.weightKg} kg" : "N/A"}'),
+            _buildRow(
+              'Thể hình',
+              '${player.heightCm > 0 ? "${player.heightCm} cm" : "N/A"} / ${player.weightKg > 0 ? "${player.weightKg} kg" : "N/A"}',
+            ),
             const Divider(height: 12),
-            _buildRow('Kỹ thuật (Skill Moves)', player.skillMoves > 0 ? '★' * player.skillMoves : 'N/A'),
+            _buildRow(
+              'Kỹ thuật (Skill Moves)',
+              player.skillMoves > 0 ? '★' * player.skillMoves : 'N/A',
+            ),
           ],
         ),
       ),
@@ -348,12 +399,18 @@ class B04Screen extends ConsumerWidget {
           color: Colors.amber.shade50,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: const Text('Chưa có thông tin kỹ thuật đặc biệt.', style: TextStyle(color: Colors.brown)),
+        child: const Text(
+          'Chưa có thông tin kỹ thuật đặc biệt.',
+          style: TextStyle(color: Colors.brown),
+        ),
       );
     }
 
     if (player.skills!.isEmpty) {
-      return const Text('Cầu thủ này không có kỹ thuật đặc biệt.', style: TextStyle(color: Colors.grey));
+      return const Text(
+        'Cầu thủ này không có kỹ thuật đặc biệt.',
+        style: TextStyle(color: Colors.grey),
+      );
     }
 
     return Column(
@@ -362,7 +419,10 @@ class B04Screen extends ConsumerWidget {
           margin: const EdgeInsets.only(bottom: 8),
           child: ListTile(
             leading: const Icon(Icons.stars, color: Colors.amber),
-            title: Text(skill.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+            title: Text(
+              skill.name,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
             subtitle: Text(
               skill.description.isNotEmpty
                   ? skill.description

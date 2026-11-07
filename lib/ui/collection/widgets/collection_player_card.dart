@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../data/model/player.dart';
+import '../../../routing/app_routes.dart';
 
 class CollectionPlayerCard extends StatelessWidget {
   const CollectionPlayerCard({
@@ -19,6 +20,8 @@ class CollectionPlayerCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: ListTile(
+        onTap: () =>
+            Navigator.pushNamed(context, AppRoutes.b04, arguments: player.id),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: Container(
           width: 52,

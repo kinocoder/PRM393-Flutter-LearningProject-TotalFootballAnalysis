@@ -12,7 +12,6 @@ import '../../../data/repositories/player_repository.dart';
 
 part 'collection_view_models.g.dart';
 
-/// Màn E01: danh sách các cầu thủ trong bộ sưu tập của người dùng hiện tại.
 @riverpod
 class MyCollection extends _$MyCollection {
   @override
@@ -45,13 +44,11 @@ class MyCollection extends _$MyCollection {
   }
 }
 
-/// Nguồn dữ liệu cho E02. Phần E chỉ đọc danh mục mock dùng chung của phần B.
 @riverpod
 Future<List<Player>> collectionCandidates(Ref ref) {
   return ref.watch(playerRepositoryProvider).getPlayers();
 }
 
-/// Màn E03: chỉ trả về cầu thủ đã được đánh dấu tim.
 @riverpod
 class FavoritePlayerIds extends _$FavoritePlayerIds {
   @override
@@ -73,7 +70,6 @@ class FavoritePlayerIds extends _$FavoritePlayerIds {
   }
 }
 
-/// Màn E04: đọc lịch sử mà phần A đã lưu, không tạo một nguồn dữ liệu thứ hai.
 @riverpod
 class CollectionComparisonHistory extends _$CollectionComparisonHistory {
   @override
