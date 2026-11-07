@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:united2/data/model/avatar_failure.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:united2/data/model/user_profile.dart';
@@ -70,15 +73,77 @@ void main() {
     await expectLater(repo.updateAvatar('one', image), throwsA(same(error)));
     verifyZeroInteractions(store);
   });
-  test('R04 failed Firestore after upload reports original error', () async {
-    final error = StateError('write failed');
-    when(() => cloud.uploadAvatar(image)).thenAnswer(
-      (_) async => const AvatarUploadResult(url: 'url', publicId: 'id'),
+  test(
+    'R04 write failure retains uploaded identity and original cause',
+    () async {
+      final error = StateError('write failed');
+      when(() => cloud.uploadAvatar(image)).thenAnswer(
+        (_) async => const AvatarUploadResult(url: 'url', publicId: 'id'),
+      );
+      when(
+        () => store.updateAvatar('one', avatarUrl: 'url', avatarPublicId: 'id'),
+      ).thenThrow(error);
+      await expectLater(
+        repo.updateAvatar('one', image),
+        throwsA(
+          isA<AvatarSaveException>()
+              .having((e) => e.cause, 'cause', same(error))
+              .having((e) => e.uid, 'uid', 'one')
+              .having((e) => e.avatarPublicId, 'public id', 'id')
+              .having((e) => e.avatarUrl, 'url', 'url')
+              .having((e) => e.timedOut, 'timedOut', isFalse),
+        ),
+      );
+      verify(() => cloud.uploadAvatar(image)).called(1);
+      verifyNoMoreInteractions(cloud);
+    },
+  );
+
+  for (final failLate in [false, true]) {
+    test(
+      'R05 write timeout is uncertain; late completion error=$failLate',
+      () async {
+        repo = ProfileRepository(
+          cloudinaryService: cloud,
+          firestoreService: store,
+          avatarWriteTimeout: const Duration(milliseconds: 20),
+        );
+        final pending = Completer<void>();
+        when(() => cloud.uploadAvatar(image)).thenAnswer(
+          (_) async => const AvatarUploadResult(url: 'url', publicId: 'id'),
+        );
+        when(
+          () =>
+              store.updateAvatar('one', avatarUrl: 'url', avatarPublicId: 'id'),
+        ).thenAnswer((_) => pending.future);
+        await expectLater(
+          repo.updateAvatar('one', image),
+          throwsA(
+            isA<AvatarSaveException>()
+                .having((e) => e.timedOut, 'timedOut', isTrue)
+                .having((e) => e.cause, 'cause', isA<TimeoutException>())
+                .having((e) => e.avatarPublicId, 'public id', 'id')
+                .having(
+                  (e) => e.toString(),
+                  'message',
+                  contains('chưa xác nhận'),
+                ),
+          ),
+        );
+        if (failLate) {
+          pending.completeError(StateError('late write error'));
+        } else {
+          pending.complete();
+        }
+        await Future<void>.delayed(Duration.zero);
+        verify(() => cloud.uploadAvatar(image)).called(1);
+        verifyNoMoreInteractions(cloud);
+        verify(
+          () =>
+              store.updateAvatar('one', avatarUrl: 'url', avatarPublicId: 'id'),
+        ).called(1);
+        verifyNoMoreInteractions(store);
+      },
     );
-    when(
-      () => store.updateAvatar('one', avatarUrl: 'url', avatarPublicId: 'id'),
-    ).thenThrow(error);
-    await expectLater(repo.updateAvatar('one', image), throwsA(same(error)));
-    verify(() => cloud.uploadAvatar(image)).called(1);
-  });
+  }
 }
