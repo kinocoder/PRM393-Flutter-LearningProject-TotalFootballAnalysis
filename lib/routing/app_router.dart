@@ -10,12 +10,12 @@ import '../ui/home/widgets/home_screen.dart';
 import '../ui/catalog/widgets/b01_screen.dart';
 import '../ui/catalog/widgets/b02_screen.dart';
 import '../ui/catalog/widgets/b03_screen.dart';
+import '../ui/catalog/widgets/b04_screen.dart';
 import '../ui/comparison/widgets/a01_screen.dart';
 import '../ui/comparison/widgets/a02_screen.dart';
 import '../ui/comparison/widgets/a03_screen.dart';
 import '../ui/comparison/widgets/a04_screen.dart';
 import '../ui/lineups/widgets/c01_screen.dart';
-import 'app_routes.dart';
 import 'app_routes.dart';
 import '../ui/authentication/widgets/user_profile_screen.dart';
 
@@ -37,11 +37,11 @@ class AppRouter {
   Route<void> onGenerateRoute(RouteSettings settings) {
     return MaterialPageRoute<void>(
       settings: settings,
-      builder: (_) => _screen(settings.name),
+      builder: (_) => _screen(settings.name, settings.arguments),
     );
   }
 
-  Widget _screen(String? name) {
+  Widget _screen(String? name, Object? arguments) {
     if (session.isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
@@ -77,6 +77,7 @@ class AppRouter {
       AppRoutes.b01 => const B01Screen(),
       AppRoutes.b02 => const B02Screen(),
       AppRoutes.b03 => const B03Screen(),
+      AppRoutes.b04 => B04Screen(playerId: (arguments is String) ? arguments : '9275',),
       AppRoutes.a01 => const A01Screen(),
       AppRoutes.a02 => const A02Screen(),
       AppRoutes.a03 => const A03Screen(),
