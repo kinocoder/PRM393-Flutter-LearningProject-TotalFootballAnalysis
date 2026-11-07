@@ -80,8 +80,6 @@ class ComparisonHistoryScreen extends ConsumerWidget {
     return '${value.day.toString().padLeft(2, '0')}/${value.month.toString().padLeft(2, '0')}/${value.year}';
   }
 
-  /// entries là snapshot do A04 lưu cùng bản ghi, nên tên vẫn hiển thị đúng
-  /// ngay cả khi PlayerRepository đổi thứ tự danh sách.
   List<String> _playerNames(ComparisonRecord record) {
     final names = record.entries
         .map((entry) => (entry['name'] as String? ?? '').trim())
@@ -91,9 +89,6 @@ class ComparisonHistoryScreen extends ConsumerWidget {
     return names.isNotEmpty ? names : record.playerIds;
   }
 
-  /// Khôi phục dữ liệu đã lưu vào state dùng chung của phần A, sau đó mở
-  /// A04. Nhờ vậy E04 chỉ là màn hình lịch sử, còn giao diện kết quả vẫn do A
-  /// quản lý và không bị nhân bản.
   void _openSavedComparison(
     BuildContext context,
     WidgetRef ref,
