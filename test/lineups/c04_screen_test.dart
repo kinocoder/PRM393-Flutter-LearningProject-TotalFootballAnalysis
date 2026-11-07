@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:united2/data/model/lineup.dart';
 import 'package:united2/data/repositories/collection_repository.dart';
 import 'package:united2/data/repositories/lineup_repository.dart';
+import 'package:united2/data/repositories/player_repository.dart';
 import 'package:united2/data/services/local_database_service.dart';
 import 'package:united2/ui/lineups/view_models/c04_view_model.dart';
 import 'package:united2/ui/lineups/widgets/c04_screen.dart';
@@ -21,6 +23,11 @@ class _FakeLineupRepository extends LineupRepository {
 
 void main() {
   const uid = 'demo_user';
+
+  setUpAll(() {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  });
 
   Color slotColor(WidgetTester tester, String caption) {
     return tester
@@ -43,7 +50,9 @@ void main() {
       slots: const {'ST': '9284'},
       updatedAt: DateTime(2026, 11, 5),
     );
-    final collection = CollectionRepository();
+    final database = LocalDatabaseService(path: inMemoryDatabasePath);
+    await PlayerRepository(database).getPlayers();
+    final collection = CollectionRepository(database);
     await collection.addToCollection(uid: uid, playerId: '9284');
 
     final container = ProviderContainer.test(
@@ -51,7 +60,7 @@ void main() {
         lineupRepositoryProvider.overrideWithValue(
           _FakeLineupRepository(lineup),
         ),
-        collectionRepositoryProvider.overrideWithValue(collection),
+        collectionRepositoryProvider.overrideWith((ref) => collection),
       ],
     );
     await tester.pumpWidget(

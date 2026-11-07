@@ -6,8 +6,6 @@ import '../view_models/collection_view_models.dart';
 import 'collection_player_card.dart';
 
 class AddPlayerToCollectionScreen extends ConsumerStatefulWidget {
-  /// [initialPlayerId] được dùng khi màn khác muốn mở E02 cho một cầu thủ đã
-  /// biết trước. Nếu null, E02 hoạt động như cũ: tìm trong toàn bộ danh mục.
   const AddPlayerToCollectionScreen({super.key, this.initialPlayerId});
 
   final String? initialPlayerId;
@@ -143,8 +141,6 @@ class _AlreadyInCollectionLabel extends StatelessWidget {
   }
 }
 
-/// Controller thuộc về chính dialog, nên khi người dùng bấm Hủy nó được dispose
-/// sau khi dialog rời widget tree; không làm lỗi đỏ do controller bị dùng muộn.
 class _AddPlayerNoteDialog extends StatefulWidget {
   const _AddPlayerNoteDialog({required this.playerName});
 

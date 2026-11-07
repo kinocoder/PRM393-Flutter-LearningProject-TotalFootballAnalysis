@@ -39,7 +39,7 @@ void main() {
   }
 
   Player playerById(String id) {
-    return PlayerRepository().players.firstWhere((p) => p.id == id);
+    return PlayerRepository.seedPlayers.firstWhere((p) => p.id == id);
   }
 
   setUpAll(() {
@@ -47,12 +47,13 @@ void main() {
     databaseFactory = databaseFactoryFfi;
   });
 
-  setUp(() {
+  setUp(() async {
     // Database nằm trong RAM, mỗi test một database mới
     database = LocalDatabaseService(path: inMemoryDatabasePath);
     container = ProviderContainer.test(
       overrides: [localDatabaseServiceProvider.overrideWithValue(database)],
     );
+    await PlayerRepository(database).getPlayers();
     // Giữ C01 sống trong suốt test, vì đọc/ghi SQLite mất thời gian thật
     container.listen(c01ViewModelProvider, (_, _) {});
   });
@@ -120,27 +121,29 @@ void main() {
     expect(container.read(provider).value!.slots, {'GK': '1'});
   });
 
-  test('C04: sửa xong chưa lưu thì repository chưa đổi; bấm Lưu mới ghi', () async {
-    final lineup = await container
-        .read(c01ViewModelProvider.notifier)
-        .createLineup('Đội A');
-    final provider = c04ViewModelProvider(lineup.id);
-    container.listen(provider, (_, _) {});
-    await container.read(provider.future);
-    final viewModel = container.read(provider.notifier);
-    final repository = container.read(lineupRepositoryProvider);
+  test(
+    'C04: sửa xong chưa lưu thì repository chưa đổi; bấm Lưu mới ghi',
+    () async {
+      final lineup = await container
+          .read(c01ViewModelProvider.notifier)
+          .createLineup('Đội A');
+      final provider = c04ViewModelProvider(lineup.id);
+      container.listen(provider, (_, _) {});
+      await container.read(provider.future);
+      final viewModel = container.read(provider.notifier);
+      final repository = container.read(lineupRepositoryProvider);
 
-    viewModel.setPlayer('ST', '9284');
-    expect(viewModel.hasUnsavedChanges, isTrue);
-    expect((await repository.getLineupById(uid, lineup.id))!.slots, isEmpty);
+      viewModel.setPlayer('ST', '9284');
+      expect(viewModel.hasUnsavedChanges, isTrue);
+      expect((await repository.getLineupById(uid, lineup.id))!.slots, isEmpty);
 
-    await viewModel.save();
-    expect(viewModel.hasUnsavedChanges, isFalse);
-    expect(
-      (await repository.getLineupById(uid, lineup.id))!.slots,
-      {'ST': '9284'},
-    );
-  });
+      await viewModel.save();
+      expect(viewModel.hasUnsavedChanges, isFalse);
+      expect((await repository.getLineupById(uid, lineup.id))!.slots, {
+        'ST': '9284',
+      });
+    },
+  );
 
   test('C03: bộ sưu tập rỗng thì không có ứng viên (AC-C03)', () async {
     expect(await container.read(c03ViewModelProvider.future), isEmpty);
@@ -158,7 +161,7 @@ void main() {
 
   test('C03: lọc cầu thủ chơi được vị trí ST', () {
     final viewModel = container.read(c03ViewModelProvider.notifier);
-    final players = PlayerRepository().players;
+    final players = PlayerRepository.seedPlayers;
 
     final result = viewModel.filterPlayers(
       players,
@@ -180,7 +183,7 @@ void main() {
     final result = container
         .read(c03ViewModelProvider.notifier)
         .filterPlayers(
-          PlayerRepository().players,
+          PlayerRepository.seedPlayers,
           keyword: '',
           slot: slotOf('ST'),
           onlyMatching: false,
@@ -303,7 +306,7 @@ void main() {
     final viewModel = container.read(c03ViewModelProvider.notifier);
 
     final result = viewModel.filterPlayers(
-      PlayerRepository().players,
+      PlayerRepository.seedPlayers,
       keyword: 'mbappe',
       slot: slotOf('ST'),
       onlyMatching: true,

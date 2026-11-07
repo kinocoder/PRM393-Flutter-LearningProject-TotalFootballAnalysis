@@ -1,46 +1,65 @@
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'dart:convert';
 
-import '../../data/model/comparison_record.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:sqflite/sqflite.dart';
+
+import '../model/comparison_record.dart';
+import '../services/local_database_service.dart';
 
 part 'comparison_history_repository.g.dart';
 
-/// Provider cấp phát đối tượng ComparisonHistoryRepository cho toàn ứng dụng
-/// keepAlive để lịch sử vẫn còn khi người dùng rời A04 và mở E04.
 @Riverpod(keepAlive: true)
 ComparisonHistoryRepository comparisonHistoryRepository(Ref ref) {
-  return ComparisonHistoryRepository();
+  return ComparisonHistoryRepository(ref.watch(localDatabaseServiceProvider));
 }
 
-/// Repository quản lý dữ liệu lịch sử so sánh theo UID người dùng (BR-05, BR-10)
 class ComparisonHistoryRepository {
-  /// Bộ lưu trữ tạm trong bộ nhớ
-  final List<ComparisonRecord> _inMemoryRecords = [];
+  ComparisonHistoryRepository(this._databaseService);
 
-  /// Lưu một bản ghi kết quả so sánh vào lịch sử
+  final LocalDatabaseService _databaseService;
+
   Future<void> saveRecord(ComparisonRecord record) async {
-    // Xóa bản ghi cũ nếu trùng ID
-    _inMemoryRecords.removeWhere((r) => r.id == record.id);
-    _inMemoryRecords.add(record);
+    final db = await _databaseService.database;
+    await db.insert('comparison_history', {
+      'id': record.id,
+      'uid': record.uid,
+      'created_at': record.createdAt.millisecondsSinceEpoch,
+      'record_json': jsonEncode(record.toJson()),
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  /// Truy vấn danh sách lịch sử so sánh thuộc sở hữu của người dùng `uid`, sắp xếp mới nhất lên đầu
   Future<List<ComparisonRecord>> getHistoryByUid(String uid) async {
-    final userRecords = _inMemoryRecords.where((r) => r.uid == uid).toList();
-    userRecords.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    return List<ComparisonRecord>.unmodifiable(userRecords);
+    final db = await _databaseService.database;
+    final rows = await db.query(
+      'comparison_history',
+      where: 'uid = ?',
+      whereArgs: [uid],
+      orderBy: 'created_at DESC',
+    );
+    return rows.map(_toRecord).toList(growable: false);
   }
 
-  /// Lấy thông tin bản ghi lịch sử so sánh theo id
   Future<ComparisonRecord?> getRecordById(String id) async {
-    try {
-      return _inMemoryRecords.firstWhere((r) => r.id == id);
-    } catch (_) {
-      return null;
-    }
+    final db = await _databaseService.database;
+    final rows = await db.query(
+      'comparison_history',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+    return rows.isEmpty ? null : _toRecord(rows.first);
   }
 
-  /// Xóa bản ghi lịch sử so sánh theo id (BR-12)
   Future<void> deleteRecord(String id) async {
-    _inMemoryRecords.removeWhere((r) => r.id == id);
+    final db = await _databaseService.database;
+    await db.delete('comparison_history', where: 'id = ?', whereArgs: [id]);
+  }
+
+  ComparisonRecord _toRecord(Map<String, Object?> row) {
+    return ComparisonRecord.fromJson(
+      Map<String, dynamic>.from(
+        jsonDecode(row['record_json'] as String) as Map,
+      ),
+    );
   }
 }
