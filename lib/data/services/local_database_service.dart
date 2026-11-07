@@ -1,4 +1,5 @@
 import 'dart:math';
+
 import 'package:path/path.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sqflite/sqflite.dart';
@@ -49,6 +50,63 @@ const Map<int, List<String>> databaseMigrations = {
       deleted_at INTEGER NOT NULL
     )
     ''',
+  ],
+  2: [
+    '''
+    CREATE TABLE players(
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      full_name TEXT NOT NULL,
+      image TEXT NOT NULL DEFAULT '',
+      position TEXT NOT NULL,
+      card_version TEXT NOT NULL,
+      ovr INTEGER NOT NULL,
+      level INTEGER NOT NULL,
+      nation TEXT NOT NULL,
+      club TEXT NOT NULL,
+      age INTEGER NOT NULL,
+      height_cm INTEGER NOT NULL,
+      weight_kg INTEGER NOT NULL,
+      skill_moves INTEGER NOT NULL,
+      position_ratings_json TEXT NOT NULL,
+      stats_json TEXT NOT NULL,
+      stat_details_json TEXT NOT NULL,
+      skills_json TEXT
+    )
+    ''',
+    'CREATE INDEX idx_players_name ON players(name)',
+    'CREATE INDEX idx_players_position ON players(position)',
+    'CREATE INDEX idx_players_ovr ON players(ovr)',
+    '''
+    CREATE TABLE collection_entries(
+      uid TEXT NOT NULL,
+      player_id TEXT NOT NULL,
+      note TEXT NOT NULL DEFAULT '',
+      added_at INTEGER NOT NULL,
+      PRIMARY KEY(uid, player_id),
+      FOREIGN KEY(player_id) REFERENCES players(id)
+    )
+    ''',
+    '''
+    CREATE TABLE favorite_players(
+      uid TEXT NOT NULL,
+      player_id TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      PRIMARY KEY(uid, player_id),
+      FOREIGN KEY(player_id) REFERENCES players(id)
+    )
+    ''',
+    '''
+    CREATE TABLE comparison_history(
+      id TEXT PRIMARY KEY,
+      uid TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      record_json TEXT NOT NULL
+    )
+    ''',
+    'CREATE INDEX idx_collection_entries_uid ON collection_entries(uid, added_at DESC)',
+    'CREATE INDEX idx_favorite_players_uid ON favorite_players(uid)',
+    'CREATE INDEX idx_comparison_history_uid ON comparison_history(uid, created_at DESC)',
   ],
 };
 
