@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../data/model/formation.dart';
 import '../../../data/model/player.dart';
 import '../view_models/c03_view_model.dart';
 import '../view_models/c04_view_model.dart';
@@ -8,14 +9,12 @@ import 'pitch_view.dart';
 /// C03 — Chọn cầu thủ cho một vị trí (mở khi chạm vị trí ở C04).
 class C03Screen extends ConsumerStatefulWidget {
   final String lineupId;
-  final String slotId;
-  final String role;
+  final FormationSlot slot;
 
   const C03Screen({
     super.key,
     required this.lineupId,
-    required this.slotId,
-    required this.role,
+    required this.slot,
   });
 
   @override
@@ -32,7 +31,7 @@ class _C03ScreenState extends ConsumerState<C03Screen> {
     final viewModel = ref.read(c03ViewModelProvider.notifier);
 
     return Scaffold(
-      appBar: AppBar(title: Text('Chọn cầu thủ cho ${widget.slotId}')),
+      appBar: AppBar(title: Text('Chọn cầu thủ cho ${widget.slot.id}')),
       body: Column(
         children: [
           Padding(
@@ -47,7 +46,7 @@ class _C03ScreenState extends ConsumerState<C03Screen> {
             ),
           ),
           SwitchListTile(
-            title: Text('Chỉ hiện cầu thủ chơi được ${widget.role}'),
+            title: Text('Chỉ hiện cầu thủ chơi được ${widget.slot.role}'),
             value: _onlyMatching,
             onChanged: (value) => setState(() => _onlyMatching = value),
           ),
@@ -67,7 +66,7 @@ class _C03ScreenState extends ConsumerState<C03Screen> {
                 final result = viewModel.filterPlayers(
                   players,
                   keyword: _keyword,
-                  role: widget.role,
+                  slot: widget.slot,
                   onlyMatching: _onlyMatching,
                 );
                 if (result.isEmpty) {
@@ -82,7 +81,7 @@ class _C03ScreenState extends ConsumerState<C03Screen> {
                   itemCount: result.length,
                   itemBuilder: (context, index) {
                     final player = result[index];
-                    final canPlay = canPlayRole(player, widget.role);
+                    final canPlay = canPlaySlot(player, widget.slot);
                     return ListTile(
                       leading: CircleAvatar(child: Text('${player.ovr}')),
                       title: Text(player.name),
@@ -99,7 +98,18 @@ class _C03ScreenState extends ConsumerState<C03Screen> {
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, _) => Center(child: Text('Lỗi tải dữ liệu: $error')),
+              error: (error, _) => Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('Lỗi tải dữ liệu: $error'),
+                    TextButton(
+                      onPressed: () => ref.invalidate(c03ViewModelProvider),
+                      child: const Text('Thử lại'),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ],
@@ -116,11 +126,11 @@ class _C03ScreenState extends ConsumerState<C03Screen> {
     lineup.slots.forEach((slotId, playerId) {
       if (playerId == player.id) currentSlot = slotId;
     });
-    if (currentSlot != null && currentSlot != widget.slotId) {
+    if (currentSlot != null && currentSlot != widget.slot.id) {
       final confirmed = await showConfirmDialog(
         context,
         title: 'Chuyển vị trí?',
-        message: '${player.name} đang ở $currentSlot. Chuyển sang ${widget.slotId}?',
+        message: '${player.name} đang ở $currentSlot. Chuyển sang ${widget.slot.id}?',
       );
       if (!confirmed || !mounted) return;
     }
@@ -130,14 +140,14 @@ class _C03ScreenState extends ConsumerState<C03Screen> {
       final confirmed = await showConfirmDialog(
         context,
         title: 'Lệch vị trí',
-        message: '${player.name} không đá ${widget.role}. Vẫn xếp vào?',
+        message: '${player.name} không đá ${widget.slot.role}. Vẫn xếp vào?',
       );
       if (!confirmed || !mounted) return;
     }
 
     ref
         .read(c04ViewModelProvider(widget.lineupId).notifier)
-        .setPlayer(widget.slotId, player.id);
+        .setPlayer(widget.slot.id, player.id);
     Navigator.pop(context);
   }
 }

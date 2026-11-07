@@ -92,7 +92,10 @@ void main() {
         profileRepositoryProvider.overrideWithValue(repo),
       ],
     );
-    result.listen(userProfileViewModelProvider, (_, _) {});
+    result.listen(
+      userProfileViewModelProvider(auth.currentUser!.uid),
+      (_, _) {},
+    );
     return result;
   }
 
@@ -112,17 +115,24 @@ void main() {
         await auth.signInWithEmailAndPassword(email: email, password: password);
         final first = container();
         addTearDown(first.dispose);
-        final profile = await first.read(userProfileViewModelProvider.future);
+        final profile = await first.read(
+          userProfileViewModelProvider(auth.currentUser!.uid).future,
+        );
         expect(profile.uid, uid);
         final document = db.collection('users').doc(uid);
         expect(
           (await document.get(const GetOptions(source: Source.server))).exists,
           isTrue,
         );
-        final vm = first.read(userProfileViewModelProvider.notifier);
+        final vm = first.read(
+          userProfileViewModelProvider(auth.currentUser!.uid).notifier,
+        );
         await vm.updateDisplayName('Emulator Player');
         expect(
-          first.read(userProfileViewModelProvider).value!.displayName,
+          first
+              .read(userProfileViewModelProvider(auth.currentUser!.uid))
+              .value!
+              .displayName,
           'Emulator Player',
         );
         final temporary = await Directory.systemTemp.createTemp(
@@ -133,7 +143,10 @@ void main() {
             .writeAsBytes([1, 2, 3]);
         await vm.updateAvatar(XFile(image.path));
         expect(
-          first.read(userProfileViewModelProvider).value!.avatarUrl,
+          first
+              .read(userProfileViewModelProvider(auth.currentUser!.uid))
+              .value!
+              .avatarUrl,
           'https://example.test/avatar.png',
         );
         final saved = (await document.get(
@@ -143,7 +156,9 @@ void main() {
         first.dispose();
         final second = container();
         addTearDown(second.dispose);
-        final reloaded = await second.read(userProfileViewModelProvider.future);
+        final reloaded = await second.read(
+          userProfileViewModelProvider(auth.currentUser!.uid).future,
+        );
         expect(reloaded.displayName, 'Emulator Player');
         expect(reloaded.avatarUrl, 'https://example.test/avatar.png');
         await auth.signOut();
@@ -181,14 +196,19 @@ void main() {
       }
       final scope = container();
       addTearDown(scope.dispose);
-      await scope.read(userProfileViewModelProvider.future);
+      await scope.read(
+        userProfileViewModelProvider(auth.currentUser!.uid).future,
+      );
       if (restartPhase == 'seed') {
         await scope
-            .read(userProfileViewModelProvider.notifier)
+            .read(userProfileViewModelProvider(auth.currentUser!.uid).notifier)
             .updateDisplayName('Restart $runId');
       }
       expect(
-        scope.read(userProfileViewModelProvider).value!.displayName,
+        scope
+            .read(userProfileViewModelProvider(auth.currentUser!.uid))
+            .value!
+            .displayName,
         'Restart $runId',
       );
       final saved = await db
