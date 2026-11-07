@@ -1,4 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import '../../../data/model/player_query.dart';
 import '../../../data/repositories/player_repository.dart';
 part 'b03_view_model.g.dart';
@@ -23,7 +24,8 @@ class CatalogFilter extends _$CatalogFilter {
 /// Trạng thái giao diện của màn hình B03
 class B03State {
   final PlayerQuery draftQuery; // Bộ lọc bản nháp người dùng đang tinh chỉnh
-  final Map<String, List<String>> filterOptions; // Danh sách tùy chọn thực tế từ dữ liệu (BR-11)
+  final Map<String, List<String>>
+  filterOptions; // Danh sách tùy chọn thực tế từ dữ liệu (BR-11)
   final int matchedCount; // Số lượng kết quả khớp tính trước (Preview count)
 
   const B03State({
@@ -50,28 +52,34 @@ class B03State {
 class B03ViewModel extends _$B03ViewModel {
   @override
   B03State build() {
-    // 1. Lấy bộ lọc đang áp dụng từ CatalogFilterProvider
     final appliedQuery = ref.watch(catalogFilterProvider);
-    final repo = ref.watch(playerRepositoryProvider);
-
-    // 2. Lấy danh sách các thuộc tính thực tế có trong data (BR-11)
-    final options = repo.getFilterOptions();
-
-    // 3. Tính trước số lượng kết quả khớp ban đầu
-    final count = repo.filterPlayers(appliedQuery).length;
-
-    return B03State(
+    final initial = B03State(
       draftQuery: appliedQuery,
-      filterOptions: options,
-      matchedCount: count,
+      filterOptions: const {},
+      matchedCount: 0,
     );
+    var disposed = false;
+    ref.onDispose(() => disposed = true);
+    Future<void>(() async {
+      final repo = ref.read(playerRepositoryProvider);
+      final options = await repo.getFilterOptions();
+      final count = (await repo.filterPlayers(appliedQuery)).length;
+      if (!disposed) {
+        state = initial.copyWith(filterOptions: options, matchedCount: count);
+      }
+    });
+    return initial;
   }
 
   /// Cập nhật nháp và tính lại số cầu thủ khớp ngay lập tức
   void _updateDraft(PlayerQuery newDraft) {
-    final repo = ref.read(playerRepositoryProvider);
-    final count = repo.filterPlayers(newDraft).length;
-    state = state.copyWith(draftQuery: newDraft, matchedCount: count);
+    state = state.copyWith(draftQuery: newDraft);
+    Future<void>(() async {
+      final count =
+          (await ref.read(playerRepositoryProvider).filterPlayers(newDraft))
+              .length;
+      state = state.copyWith(matchedCount: count);
+    });
   }
 
   /// Bật / tắt chọn vị trí thi đấu (cho phép chọn nhiều)
@@ -87,34 +95,33 @@ class B03ViewModel extends _$B03ViewModel {
 
   /// Chọn Câu lạc bộ
   void selectClub(String? club) {
-    _updateDraft(state.draftQuery.copyWith(
-      club: club,
-      clearClub: club == null,
-    ));
+    _updateDraft(
+      state.draftQuery.copyWith(club: club, clearClub: club == null),
+    );
   }
 
   /// Chọn Quốc gia / Quốc tịch
   void selectNation(String? nation) {
-    _updateDraft(state.draftQuery.copyWith(
-      nation: nation,
-      clearNation: nation == null,
-    ));
+    _updateDraft(
+      state.draftQuery.copyWith(nation: nation, clearNation: nation == null),
+    );
   }
 
   /// Chọn Mùa thẻ (Card Version)
   void selectCardVersion(String? version) {
-    _updateDraft(state.draftQuery.copyWith(
-      cardVersion: version,
-      clearCardVersion: version == null,
-    ));
+    _updateDraft(
+      state.draftQuery.copyWith(
+        cardVersion: version,
+        clearCardVersion: version == null,
+      ),
+    );
   }
 
   /// Thay đổi chỉ số OVR tối thiểu
   void setMinOvr(int? ovr) {
-    _updateDraft(state.draftQuery.copyWith(
-      minOvr: ovr,
-      clearMinOvr: ovr == null,
-    ));
+    _updateDraft(
+      state.draftQuery.copyWith(minOvr: ovr, clearMinOvr: ovr == null),
+    );
   }
 
   /// Thay đổi kiểu sắp xếp ('ovr_desc', 'ovr_asc', 'name_asc')

@@ -1,22 +1,31 @@
+import 'dart:convert';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:sqflite/sqflite.dart';
+
 import '../../utils/text_normalize.dart';
 import '../model/player.dart';
 import '../model/player_query.dart';
 import '../model/skill.dart';
+import '../services/local_database_service.dart';
 part 'player_repository.g.dart';
 
 @riverpod
 PlayerRepository playerRepository(Ref ref) {
-  return PlayerRepository();
+  return PlayerRepository(ref.watch(localDatabaseServiceProvider));
 }
 
 class PlayerRepository {
-  final List<Player> players = [
+  PlayerRepository(this._databaseService);
+
+  final LocalDatabaseService _databaseService;
+
+  static final List<Player> _seedPlayers = [
     const Player(
       id: "9275",
       name: "O. Dembélé",
       fullName: "Ousmane Dembélé",
-      image: "https://media.api-sports.io/football/players/154.png" ,
+      image: "https://media.api-sports.io/football/players/154.png",
       position: "RW",
       cardVersion: "TOTS",
       ovr: 123,
@@ -32,7 +41,7 @@ class PlayerRepository {
         "ATK": 120,
       },
       statDetails: {
-        "Pace": {"Acceleration": 130, "Sprint Speed": 126}
+        "Pace": {"Acceleration": 130, "Sprint Speed": 126},
       },
       skills: [
         Skill(
@@ -40,7 +49,7 @@ class PlayerRepository {
           name: "Speed Dribbler",
           type: "Special",
           description: "Rê bóng tốc độ cao",
-        )
+        ),
       ],
       nation: "Pháp",
       club: "FC Barcelona",
@@ -67,7 +76,7 @@ class PlayerRepository {
         "PHY": 90,
       },
       statDetails: {
-        "Passing": {"Vision": 103, "Short Passing": 100}
+        "Passing": {"Vision": 103, "Short Passing": 100},
       },
       skills: [
         Skill(
@@ -75,7 +84,7 @@ class PlayerRepository {
           name: "Playmaker",
           type: "Midfield",
           description: "Chọc khe tinh tế",
-        )
+        ),
       ],
       nation: "Algérie",
       club: "Atlético Solano",
@@ -102,7 +111,7 @@ class PlayerRepository {
         "PHY": 95,
       },
       statDetails: {
-        "Shooting": {"Finishing": 101, "Shot Power": 98}
+        "Shooting": {"Finishing": 101, "Shot Power": 98},
       },
       skills: [
         Skill(
@@ -110,7 +119,7 @@ class PlayerRepository {
           name: "Power Header",
           type: "Attack",
           description: "Đánh đầu uy lực",
-        )
+        ),
       ],
       nation: "Ghana",
       club: "Riverside United",
@@ -137,7 +146,7 @@ class PlayerRepository {
         "PHY": 100,
       },
       statDetails: {
-        "Defending": {"Standing Tackle": 99, "Heading Accuracy": 97}
+        "Defending": {"Standing Tackle": 99, "Heading Accuracy": 97},
       },
       skills: [
         Skill(
@@ -145,7 +154,7 @@ class PlayerRepository {
           name: "Power Header",
           type: "Defensive",
           description: "Cản phá không chiến",
-        )
+        ),
       ],
       nation: "Argentina",
       club: "Atlético Solano",
@@ -173,7 +182,7 @@ class PlayerRepository {
         "PHY": 102,
       },
       statDetails: {
-        "Pace": {"Acceleration": 134, "Sprint Speed": 130}
+        "Pace": {"Acceleration": 134, "Sprint Speed": 130},
       },
       skills: [
         Skill(
@@ -181,7 +190,7 @@ class PlayerRepository {
           name: "Rapid Burst",
           type: "Special",
           description: "Bứt tốc thần tốc",
-        )
+        ),
       ],
       nation: "Pháp",
       club: "Real Madrid",
@@ -209,7 +218,7 @@ class PlayerRepository {
         "PHY": 125,
       },
       statDetails: {
-        "Shooting": {"Finishing": 130, "Shot Power": 128}
+        "Shooting": {"Finishing": 130, "Shot Power": 128},
       },
       skills: [
         Skill(
@@ -217,7 +226,7 @@ class PlayerRepository {
           name: "Bulldozer",
           type: "Special",
           description: "Càn quét tì đè",
-        )
+        ),
       ],
       nation: "Na Uy",
       club: "Manchester City",
@@ -228,32 +237,42 @@ class PlayerRepository {
     ),
   ];
 
+  static List<Player> get seedPlayers => List.unmodifiable(_seedPlayers);
+
   Future<List<Player>> getPlayers() async {
-    return List<Player>.unmodifiable(players);
+    final db = await _databaseService.database;
+    await _seedIfNeeded(db);
+    final rows = await db.query('players', orderBy: 'ovr DESC, name ASC');
+    return rows.map(_toPlayer).toList(growable: false);
   }
 
   Future<Player?> getPlayerByID(String id) async {
-    for (final player in players) {
-      if (player.id == id) {
-        return player;
-      }
-    }
-    return null;
+    final db = await _databaseService.database;
+    await _seedIfNeeded(db);
+    final rows = await db.query(
+      'players',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+    return rows.isEmpty ? null : _toPlayer(rows.first);
   }
 
   Future<List<Player>> searchPlayers(String query) async {
     final keyword = normalizeForSearch(query);
     if (keyword.isEmpty) return [];
-
-    return players.where((player) {
-      final name = normalizeForSearch(player.name);
-      final fullName = normalizeForSearch(player.fullName);
-      return name.contains(keyword) || fullName.contains(keyword);
-    }).toList();
+    final players = await getPlayers();
+    return players
+        .where((player) {
+          final name = normalizeForSearch(player.name);
+          final fullName = normalizeForSearch(player.fullName);
+          return name.contains(keyword) || fullName.contains(keyword);
+        })
+        .toList(growable: false);
   }
 
-  /// Lấy danh sách các giá trị thuộc tính thực tế có trong dữ liệu (BR-11)
-  Map<String, List<String>> getFilterOptions() {
+  Future<Map<String, List<String>>> getFilterOptions() async {
+    final players = await getPlayers();
     final positions = <String>{};
     final nations = <String>{};
     final clubs = <String>{};
@@ -274,13 +293,14 @@ class PlayerRepository {
     };
   }
 
-  /// Lọc và đếm số lượng cầu thủ khớp với PlayerQuery
-  List<Player> filterPlayers(PlayerQuery query) {
-    var result = List<Player>.from(players);
+  Future<List<Player>> filterPlayers(PlayerQuery query) async {
+    var result = List<Player>.from(await getPlayers());
 
     // Lọc theo danh sách vị trí
     if (query.positions.isNotEmpty) {
-      result = result.where((p) => query.positions.contains(p.position)).toList();
+      result = result
+          .where((p) => query.positions.contains(p.position))
+          .toList();
     }
     // Lọc quốc gia
     if (query.nation != null && query.nation!.isNotEmpty) {
@@ -310,5 +330,66 @@ class PlayerRepository {
     }
 
     return result;
+  }
+
+  Future<void> _seedIfNeeded(Database db) async {
+    final count = Sqflite.firstIntValue(
+      await db.rawQuery('SELECT COUNT(*) FROM players'),
+    );
+    if (count != 0) return;
+
+    final batch = db.batch();
+    for (final player in _seedPlayers) {
+      batch.insert('players', _toRow(player));
+    }
+    await batch.commit(noResult: true);
+  }
+
+  Map<String, Object?> _toRow(Player player) => {
+    'id': player.id,
+    'name': player.name,
+    'full_name': player.fullName,
+    'image': player.image,
+    'position': player.position,
+    'card_version': player.cardVersion,
+    'ovr': player.ovr,
+    'level': player.level,
+    'nation': player.nation,
+    'club': player.club,
+    'age': player.age,
+    'height_cm': player.heightCm,
+    'weight_kg': player.weightKg,
+    'skill_moves': player.skillMoves,
+    'position_ratings_json': jsonEncode(player.positionRatings),
+    'stats_json': jsonEncode(player.stats),
+    'stat_details_json': jsonEncode(player.statDetails),
+    'skills_json': player.skills == null
+        ? null
+        : jsonEncode(player.skills!.map((skill) => skill.toJson()).toList()),
+  };
+
+  Player _toPlayer(Map<String, Object?> row) {
+    return Player.fromJson({
+      'id': row['id'],
+      'name': row['name'],
+      'fullName': row['full_name'],
+      'image': row['image'],
+      'position': row['position'],
+      'cardVersion': row['card_version'],
+      'ovr': row['ovr'],
+      'level': row['level'],
+      'nation': row['nation'],
+      'club': row['club'],
+      'age': row['age'],
+      'heightCm': row['height_cm'],
+      'weightKg': row['weight_kg'],
+      'skillMoves': row['skill_moves'],
+      'positionRatings': jsonDecode(row['position_ratings_json'] as String),
+      'stats': jsonDecode(row['stats_json'] as String),
+      'statDetails': jsonDecode(row['stat_details_json'] as String),
+      'skills': row['skills_json'] == null
+          ? null
+          : jsonDecode(row['skills_json'] as String),
+    });
   }
 }
