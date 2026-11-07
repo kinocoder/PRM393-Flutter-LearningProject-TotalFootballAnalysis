@@ -16,6 +16,7 @@ class CollectionRepository {
 
   final LocalDatabaseService _databaseService;
 
+
   Future<List<CollectionEntry>> getCollection(String uid) async {
     final db = await _databaseService.database;
     final rows = await db.query(
