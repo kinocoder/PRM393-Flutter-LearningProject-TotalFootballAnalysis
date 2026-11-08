@@ -7,9 +7,13 @@ part 'current_user_provider.g.dart';
 @riverpod
 class CurrentUid extends _$CurrentUid {
   @override
-  String build() => 'demo_user';
+  String build() => '';
 
   void setUid(String uid) {
     state = uid;
+  }
+
+  void clear() {
+    state = '';
   }
 }
