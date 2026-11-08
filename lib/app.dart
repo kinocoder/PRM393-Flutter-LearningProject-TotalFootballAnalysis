@@ -13,9 +13,10 @@ class FootballApp extends ConsumerWidget {
     final session = ref.watch(authSessionProvider);
     ref.watch(currentUidProvider);
     ref.listen(authSessionProvider, (_, next) {
-      final authSession = next.valueOrNull;
-      ref.read(currentUidProvider.notifier).setUid(authSession?.uid ?? '');
-    }, fireImmediately: true);
+      next.whenData((authSession) {
+        ref.read(currentUidProvider.notifier).setUid(authSession?.uid ?? '');
+      });
+    });
     final router = AppRouter(
       session,
       onRetry: () => ref.invalidate(authSessionProvider),
