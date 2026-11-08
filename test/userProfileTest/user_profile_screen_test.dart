@@ -212,7 +212,7 @@ void main() {
         tester.element(find.byType(UserProfileScreen)),
       );
       await container
-          .read(userProfileViewModelProvider.notifier)
+          .read(userProfileViewModelProvider('one').notifier)
           .updateAvatar(XFile('never-read.png'));
       await tester.pumpAndSettle();
       expect(find.text('Lỗi hồ sơ: $error'), findsOneWidget);

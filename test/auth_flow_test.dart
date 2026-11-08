@@ -223,7 +223,7 @@ void main() {
     await mount(tester, repo);
     repo.events.add(verified);
     await tester.pumpAndSettle();
-    navigator(tester).pushNamed(AppRoutes.b04);
+    navigator(tester).pushNamed(AppRoutes.userProfile);
     await tester.pumpAndSettle();
     final oldNavigator = navigator(tester);
     repo.events.add(
@@ -231,7 +231,8 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(navigator(tester), same(oldNavigator));
-    expect(find.text('Chức năng chưa được triển khai.'), findsOneWidget);
+    expect(find.byType(UserProfileScreen), findsOneWidget);
+    expect(navigator(tester).canPop(), isTrue);
     await repo.signOut();
     await tester.pumpAndSettle();
     expect(find.byType(LoginScreen), findsOneWidget);
